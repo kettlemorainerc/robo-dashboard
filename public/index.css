@@ -1,0 +1,24 @@
+html, html > body, #root {
+	margin: 0;
+	padding: 0;
+	width: auto;
+	height: auto;
+}
+div#wrapper {
+	/* Split the grid into 4 different 'areas' assignable via a child 'grid-area' css prop */
+	grid-template-areas: 
+		"head head head head head" 
+		"left body body body right"
+		"left body body body right"
+	;
+
+	/* 'left' and 'right' will be a MINIMUM of 150px and up-to ~20% of the space available. Body will be the smaller of [60% of the width] and [width - 300px] */
+	grid-template-columns: minmax(150px, 1fr) repeat(3, 1fr) minmax(150px, 1fr);
+	/* We can adjust the heights of the 3 available areas here */
+	grid-template-rows: 20vh;
+	grid-auto-rows: auto;
+	display: grid;
+	/* the wrapper should be the ENTIRE height AND width of the viewport (the window) */
+	width: 100vw;
+	height: 100vh;
+}

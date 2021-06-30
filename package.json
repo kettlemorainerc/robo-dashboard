@@ -2,9 +2,11 @@
   "name": "FRCDashboard",
   "version": "2.1.0",
   "description": "Robot control dashboard boilerplate for FRC.",
-  "main": "src/main.js",
+  "main": "native/main.js",
   "scripts": {
     "start": "electron .",
+    "compile": "tsc --watch",
+    "display": "run-p -rl compile start",
     "package-mac": "electron-packager . --platform=darwin --icon=images/icon.icns --out dist/",
     "package-linux": "electron-packager . --platform=linux --icon=images/icon.png --out dist/",
     "package-win": "electron-packager . --platform=win32 --icon=images/icon.ico --out dist/"
@@ -21,10 +23,18 @@
   "homepage": "http://frcdashboard.github.io",
   "dependencies": {
     "@frc-web-components/frc-web-components": "^1.1.7",
-    "wpilib-nt-client": "^1.7.1"
+    "wpilib-nt-client": "^1.7.1",
+    "electron": "^7.1.5",
+    "react": "17.0.2",
+    "react-dom": "17.0.2"
   },
   "devDependencies": {
-    "electron": "^7.1.5",
-    "electron-packager": "^14.1.1"
+    "electron-packager": "^14.1.1",
+    "typescript": "4.3.4",
+    "npm-run-all": "4.1.5",
+    "@types/react": "17.0.11",
+    "@types/react-dom": "17.0.8",
+    "require": "2.4.20",
+    "esbuild": "0.12.12"
   }
 }

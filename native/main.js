@@ -109,7 +109,11 @@ function createWindow() {
     // Move window to top (left) of screen.
     mainWindow.setPosition(0, 0);
     // Load window.
-    mainWindow.loadURL(`file://${__dirname}/index.html`);
+    // mainWindow.loadURL(`file://${__dirname}/index.html`);
+	const targetURL = `file://${__dirname}/../public/index.html`;
+	console.log(targetURL)
+	mainWindow.loadURL(targetURL);
+	mainWindow.show();
     // Once the python server is ready, load window contents.
     mainWindow.once('ready-to-show', () => {
         console.log('main window is ready to be shown');
@@ -132,9 +136,14 @@ function createWindow() {
     mainWindow.on('unresponsive', () => {
         console.log('Main Window is unresponsive');
     });
-    mainWindow.webContents.on('did-fail-load', () => {
-        console.log('window failed load');
+    mainWindow.webContents.on('did-fail-load', (ev, code, desc) => {
+        console.log('window failed load:', code, desc);
+		setTimeout(() => mainWindow.loadURL(targetURL), 1000);
     });
+
+	mainWindow.webContents.on("dom-ready", (e) => {
+		console.log('dom-ready', e.target)
+	})
 }
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

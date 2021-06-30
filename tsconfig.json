@@ -1,0 +1,21 @@
+{
+	"compilerOptions": {
+		"target": "ES2015",
+		"module": "AMD",
+		"moduleResolution": "Node",
+		"jsx": "react",
+		"baseUrl": "./",
+		"outFile": "./build/build.js",
+		"rootDir": "./src",
+		"noEmit": false,
+		"strict": true,
+		"skipLibCheck": true,
+		"esModuleInterop": true,
+		"resolveJsonModule": false,
+		"allowJs": true,
+		"lib": ["DOM", "DOM.Iterable", "ES2015", "ES2016", "ES2017"],
+		"noImplicitAny": false,
+		
+	},
+	"include": ["src"]
+}
