@@ -1,9 +1,24 @@
 'use strict';
 Object.defineProperty(exports, '__esModule', { value: true });
+const targetHTML = `${__dirname}/../public/index.html`;
+const targetURL = `file://${targetHTML}`;
+const watchTargets = [
+	targetHTML,
+	`${__dirname}/../build/build.js`,
+	`${__dirname}/../plublic/index.css`,
+];
 
+
+const fs = require("fs");
 const electron = require('electron');
 const wpilib_NT = require('wpilib-nt-client');
 const client = new wpilib_NT.Client();
+
+watchTargets.forEach(file => {
+	const watcher = fs.watchFile(file, {interval: 100, persistent: false}, (curr, prev) => {
+		if(prev.mtimeMs !== curr.mtimeMs && mainWindow) mainWindow.loadURL(targetURL);
+	});
+})
 
 // The client will try to reconnect after 1 second
 client.setReconnectDelay(1000)
@@ -29,6 +44,7 @@ let connectedFunc,
     ready = false;
 
 let clientDataListener = (key, val, valType, mesgType, id, flags) => {
+	console.log("network update", mesgType, id, key, val, valType)
     if (val === 'true' || val === 'false') {
         val = val === 'true';
     }
@@ -88,6 +104,7 @@ function createWindow() {
         client.Assign(mesg.val, mesg.key, (mesg.flags & 1) === 1);
     });
     ipc.on('update', (ev, mesg) => {
+		console.log("received update", mesg.id, mesg.key, mesg.val);
         client.Update(mesg.id, mesg.val);
     });
     ipc.on('windowError', (ev, error) => {
@@ -110,7 +127,6 @@ function createWindow() {
     mainWindow.setPosition(0, 0);
     // Load window.
     // mainWindow.loadURL(`file://${__dirname}/index.html`);
-	const targetURL = `file://${__dirname}/../public/index.html`;
 	console.log(targetURL)
 	mainWindow.loadURL(targetURL);
 	mainWindow.show();

@@ -1,7 +1,7 @@
 
 type Listener<args extends any[]> = (...args: args) => void;
 type ConnectionListener = Listener<[boolean]>;
-type NetworkTableListener = Listener<[string, string, boolean]>;
+type NetworkTableListener = Listener<[string, any, boolean]>;
 
 namespace globalThis {
 	interface NetworkTable {

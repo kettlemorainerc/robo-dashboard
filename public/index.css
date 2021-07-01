@@ -22,3 +22,48 @@ div#wrapper {
 	width: 100vw;
 	height: 100vh;
 }
+
+.nt-field {
+	display: flex;
+}
+
+.nt-field > label {
+	flex: 0 0 auto;
+}
+
+.nt-field > input {
+	flex: 1 1 100%;
+	text-align: center;
+	display: inline-block;
+}
+
+.accordion {
+	border: 1px solid rgba(120, 120, 120, .5);
+}
+
+.accordion > .button {
+	border-bottom: 1px solid rgba(120, 120, 120, .5);
+	padding: .5rem;
+	display: flex;
+}
+
+.accordion > .button > .label {
+	flex: 1 1 100%;
+}
+
+.accordion > .button > .identifier {
+	flex: 0 0 auto;
+}
+
+.accordion > .content {
+	display: none;
+	padding: .5rem;
+}
+
+.accordion > .button[aria-expanded=true] + .content {
+	display: flex;
+}
+
+.accordion > .content > .nt-field {
+	flex: 1 1 auto;
+}

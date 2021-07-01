@@ -57,6 +57,12 @@ var NetworkTable = (() => {
 	const listenerMap = getIPCListeners(args);
 	Object.entries(listenerMap).forEach(([key, func]) => ipc.on(key, func))
 	ipc.send('ready');
+
+	// ipc.on('connect', (connected) => {
+	// 	if(!connected) {
+	// 		args.keys = {};
+	// 	}
+	// })
 	const {connectionListeners, globalListeners, keyListeners, keys} = args;
 
 	return {
@@ -103,6 +109,7 @@ var NetworkTable = (() => {
 
 		getValue: (key, defaultValue) => {
 			if(keys[key] !== undefined && keys[key].val !== undefined) return keys[key].val;
+			ipc.send('check', key);
 			return defaultValue;
 		},
 
@@ -122,6 +129,8 @@ var NetworkTable = (() => {
 			return args.connected;
 		},
 
-		keyToId: encodeURIComponent
+		keyToId: encodeURIComponent,
+
+		connect: to => ipc.send('connect', to)
 	};
 })();

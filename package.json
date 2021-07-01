@@ -5,8 +5,9 @@
   "main": "native/main.js",
   "scripts": {
     "start": "electron .",
-    "compile": "tsc --watch",
-    "display": "run-p -rl compile start",
+    "compile": "esbuild --bundle src/index.tsx --outfile=build/build.js",
+	"compile-watch": "npm run compile -- --watch",
+    "display": "run-p -rl compile-watch start",
     "package-mac": "electron-packager . --platform=darwin --icon=images/icon.icns --out dist/",
     "package-linux": "electron-packager . --platform=linux --icon=images/icon.png --out dist/",
     "package-win": "electron-packager . --platform=win32 --icon=images/icon.ico --out dist/"
