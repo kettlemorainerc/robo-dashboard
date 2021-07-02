@@ -6,7 +6,7 @@ The dashboard's code is designed to be 100% accessible and expandable. To this a
 
 **Contributions are VERY welcome! Please feel free to open a pull request or issue!**
 
-![Screenshot slideshow](images/screenshots.gif)
+![Screenshot slideshow](client/images/screenshots.gif)
 
 <details>
     <summary>Click to view some example implementations of FRC Dashboard</summary>
