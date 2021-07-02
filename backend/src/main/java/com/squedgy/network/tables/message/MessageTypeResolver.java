@@ -47,8 +47,6 @@ public class MessageTypeResolver implements TypeIdResolver {
 
         if(target == null) throw new IllegalArgumentException("No known message type: " + id);
 
-        System.out.println(baseType);
-        System.out.println(target);
         return TypeFactory.defaultInstance().constructSpecializedType(baseType, target);
     }
 

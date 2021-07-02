@@ -4,11 +4,10 @@
   "description": "Robot control dashboard boilerplate for FRC.",
   "main": "native/main.js",
   "scripts": {
-    "start": "nodemon --exec \"electron --disable-gpu .\"",
+    "start": "electron --disable-gpu .",
     "compile": "esbuild --bundle src/index.tsx --outfile=build/build.js",
     "compile-watch": "npm run compile -- --watch",
-	"start-backend": "cd ../backend; nodemon --exec \"./gradlew quarkusDev\" --watch ../backend/src/",
-    "display": "run-p -rl compile-watch start-backend start",
+    "display": "run-p -rl compile-watch start",
     "package-mac": "electron-packager . --platform=darwin --icon=images/icon.icns --out dist/",
     "package-linux": "electron-packager . --platform=linux --icon=images/icon.png --out dist/",
     "package-win": "electron-packager . --platform=win32 --icon=images/icon.ico --out dist/"
@@ -24,23 +23,20 @@
   },
   "homepage": "http://frcdashboard.github.io",
   "dependencies": {
-    "@frc-web-components/frc-web-components": "^1.1.7",
     "@types/ws": "^7.4.5",
     "electron": "^7.1.5",
     "react": "17.0.2",
+    "react-dnd": "^14.0.2",
     "react-dom": "17.0.2",
-    "wpilib-nt-client": "^1.7.1",
     "ws": "^7.5.1"
   },
   "devDependencies": {
     "electron-packager": "^14.1.1",
     "typescript": "4.3.4",
-    "npm-run-all": "4.1.5",
     "@types/react": "17.0.11",
     "@types/react-dom": "17.0.8",
     "require": "2.4.20",
-    "esbuild": "0.12.12",
-    "nodemon": "2.0.9"
+    "esbuild": "0.12.12"
   },
   "nodemonConfig": {
     "ignore": [

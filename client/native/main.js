@@ -5,7 +5,8 @@ const targetURL = `file://${targetHTML}`;
 const watchTargets = [
 	targetHTML,
 	`${__dirname}/../build/build.js`,
-	`${__dirname}/../plublic/index.css`,
+	`${__dirname}/../public/index.css`,
+	`${__dirname}/../public/accodion.css`,
 ];
 
 
@@ -125,7 +126,7 @@ function createWindow() {
         }
     });
     // Move window to top (left) of screen.
-    mainWindow.setPosition(0, 0);
+    // mainWindow.setPosition(0, 0);
     // Load window.
     // mainWindow.loadURL(`file://${__dirname}/index.html`);
 	console.log(targetURL)

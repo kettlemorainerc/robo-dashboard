@@ -5,9 +5,11 @@ import com.fasterxml.jackson.databind.*;
 import com.squedgy.network.tables.message.*;
 import com.squedgy.network.tables.message.Message.*;
 import edu.wpi.first.networktables.*;
+import io.quarkus.runtime.*;
 import org.slf4j.*;
 
 import javax.enterprise.context.*;
+import javax.enterprise.event.*;
 import javax.websocket.*;
 import javax.websocket.server.*;
 import java.io.*;
@@ -22,6 +24,7 @@ public class ValueSocket {
     private static final Logger LOG = getLogger(ValueSocket.class);
     public static final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
     private static final Set<Session> sessions = new HashSet<>();
+    private static Optional<Integer> handlerId = Optional.empty();
 
     public static Message messageFor(String key, NetworkTableValue value) {
         if(value.isBoolean()) return new BooleanMessage(Type.SET, key, getBoolean(key));
@@ -44,11 +47,22 @@ public class ValueSocket {
         }
     }
 
+    void onStartup(@Observes StartupEvent ignored) {
+        LOG.info("Starting app");
+        handlerId = Optional.of(NetworkUtilities.addListener(ValueSocket::onEntryUpdate));
+
+    }
+
+    void onShutdown(@Observes ShutdownEvent ignored) {
+        LOG.info("Shutting down");
+        handlerId.ifPresent(NetworkUtilities::removeListener);
+    }
+
     public static void alertListeners(String key, NetworkTableValue value) throws JsonProcessingException {
         Message toSend = messageFor(key, value);
         if(toSend == null) return;
         String sending = mapper.writeValueAsString(toSend);
-        LOG.info("Sending message to connected sessions: [\"{}\"<{}>: {}]", key, value.getType(), value.getValue());
+        LOG.info("Sending message: {}", toSend);
         for(Session sess : sessions) sess.getAsyncRemote().sendObject(sending);
     }
 
@@ -72,8 +86,8 @@ public class ValueSocket {
 
     @OnMessage
     public void message(String message, Session session) throws IOException {
-        LOG.info("New Message from [{}]: {}", session, message);
         Message actual = mapper.readValue(message, Message.class);
+        LOG.info("Received Message: {}", actual);
         Type messageType = actual.getMessageType();
 
         if(messageType == Type.GET) actual.onGet(session);

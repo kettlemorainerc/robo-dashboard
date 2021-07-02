@@ -19,6 +19,7 @@ public final class NetworkUtilities {
     public static final String SMART_DASHBOARD_NAME = "SmartDashboard";
     static {
         NETWORK_TABLE.startServer();
+        NETWORK_TABLE.startClient();
         CACHED_TABLES.put(SMART_DASHBOARD_NAME, NETWORK_TABLE.getTable(SMART_DASHBOARD_NAME));
 //        NETWORK_TABLE.startClient("127.0.0.1");
     }
@@ -45,68 +46,12 @@ public final class NetworkUtilities {
         setBooleanArray(SMART_DASHBOARD_NAME, key, val);
     }
 
-    public static void setStringArray(String table, String key, String[] val) {
-        getNetworkTable(table).getEntry(key).setStringArray(val);
-    }
-
-    public static void setStringArray(String key, String[] val) {
-        setStringArray(SMART_DASHBOARD_NAME, key, val);
-    }
-
-    public static void setDoubleArray(String table, String key, double[] val) {
-        getNetworkTable(table).getEntry(key).setDoubleArray(val);
-    }
-
-    public static void setDoubleArray(String key, double[] val) {
-        setDoubleArray(SMART_DASHBOARD_NAME, key, val);
-    }
-
-    public static void setBoolean(String table, String key, boolean val) {
-        getNetworkTable(table).getEntry(key).setBoolean(val);
-    }
-
-    public static void setBoolean(String key, boolean val) {
-        setBoolean(SMART_DASHBOARD_NAME, key, val);
-    }
-
-    public static void setString(String table, String key, String val) {
-        getNetworkTable(table).getEntry(key).setString(val);
-    }
-
-    public static void setString(String key, String val) {
-        setString(SMART_DASHBOARD_NAME, key, val);
-    }
-
-    public static void setDouble(String table, String key, double val) {
-        getNetworkTable(table).getEntry(key).setDouble(val);
-    }
-
-    public static void setDouble(String key, double val) {
-        setDouble(SMART_DASHBOARD_NAME, key, val);
-    }
-
     public static boolean[] getBooleanArray(String table, String key) {
         return getNetworkTable(table).getEntry(key).getBooleanArray((boolean[]) null);
     }
 
     public static boolean[] getBooleanArray(String key) {
         return getBooleanArray(SMART_DASHBOARD_NAME, key);
-    }
-
-    public static String[] getStringArray(String table, String key) {
-        return getNetworkTable(table).getEntry(key).getStringArray(null);
-    }
-
-    public static String[] getStringArray(String key) {
-        return getStringArray(SMART_DASHBOARD_NAME, key);
-    }
-
-    public static double[] getDoubleArray(String table, String key) {
-        return getNetworkTable(table).getEntry(key).getDoubleArray((double[]) null);
-    }
-
-    public static double[] getDoubleArray(String key) {
-        return getDoubleArray(SMART_DASHBOARD_NAME, key);
     }
 
     public static boolean getBoolean(String table, String key) {
@@ -117,6 +62,39 @@ public final class NetworkUtilities {
         return getBoolean(SMART_DASHBOARD_NAME, key);
     }
 
+    public static void setBoolean(String table, String key, boolean val) {
+        getNetworkTable(table).getEntry(key).setBoolean(val);
+    }
+
+    public static void setBoolean(String key, boolean val) {
+        setBoolean(SMART_DASHBOARD_NAME, key, val);
+    }
+
+    public static void setStringArray(String table, String key, String[] val) {
+        getNetworkTable(table).getEntry(key).setStringArray(val);
+    }
+
+    public static void setStringArray(String key, String[] val) {
+        setStringArray(SMART_DASHBOARD_NAME, key, val);
+    }
+
+    public static void setString(String table, String key, String val) {
+        getNetworkTable(table).getEntry(key).setString(val);
+    }
+
+    public static void setString(String key, String val) {
+        setString(SMART_DASHBOARD_NAME, key, val);
+    }
+
+
+    public static String[] getStringArray(String table, String key) {
+        return getNetworkTable(table).getEntry(key).getStringArray(null);
+    }
+
+    public static String[] getStringArray(String key) {
+        return getStringArray(SMART_DASHBOARD_NAME, key);
+    }
+
     public static String getString(String table, String key) {
         return getNetworkTable(table).getEntry(key).getString(null);
     }
@@ -125,12 +103,36 @@ public final class NetworkUtilities {
         return getString(SMART_DASHBOARD_NAME, key);
     }
 
+    public static void setDoubleArray(String table, String key, double[] val) {
+        getNetworkTable(table).getEntry(key).setDoubleArray(val);
+    }
+
+    public static void setDoubleArray(String key, double[] val) {
+        setDoubleArray(SMART_DASHBOARD_NAME, key, val);
+    }
+
+    public static double[] getDoubleArray(String table, String key) {
+        return getNetworkTable(table).getEntry(key).getDoubleArray((double[]) null);
+    }
+
+    public static double[] getDoubleArray(String key) {
+        return getDoubleArray(SMART_DASHBOARD_NAME, key);
+    }
+
     public static double getDouble(String table, String key) {
         return getNetworkTable(table).getEntry(key).getDouble(Double.NaN);
     }
 
     public static double getDouble(String key) {
         return getDouble(SMART_DASHBOARD_NAME, key);
+    }
+
+    public static void setDouble(String table, String key, double val) {
+        getNetworkTable(table).getEntry(key).setDouble(val);
+    }
+
+    public static void setDouble(String key, double val) {
+        setDouble(SMART_DASHBOARD_NAME, key, val);
     }
 
     public static void togglePersist(String table, String key) {
@@ -149,7 +151,6 @@ public final class NetworkUtilities {
 
     public static int addListener(String table, TableEntryListener listener) {
         int flags = kLocal | kFlags | kDelete | kNew | kUpdate;
-        System.out.println("FLAGS: " + flags);
         return addListener(table, listener, flags);
     }
 
