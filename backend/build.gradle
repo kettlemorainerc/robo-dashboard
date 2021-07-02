@@ -1,0 +1,100 @@
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
+
+plugins {
+    id 'java'
+    id 'io.quarkus'
+    id "edu.wpi.first.GradleRIO" version "${wpiVersion}"
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven {url 'http://maven.icm.edu.pl/artifactory/repo/'}
+    maven {url 'https://frcmaven.wpi.edu/artifactory/release/'}
+}
+
+def extractDir = "$buildDir${File.separator}tmp${File.separator}natives"
+configurations {
+    natives
+}
+
+def platform = DefaultNativePlatform.currentOperatingSystem.toFamilyName()
+
+dependencies {
+    implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
+    implementation 'io.quarkus:quarkus-rest-client-jackson'
+    implementation 'io.quarkus:quarkus-websockets'
+    implementation 'io.quarkus:quarkus-jackson'
+    implementation 'io.quarkus:quarkus-resteasy'
+    implementation 'io.quarkus:quarkus-resteasy-jackson'
+    implementation 'io.quarkus:quarkus-arc'
+    implementation 'io.quarkus:quarkus-undertow-websockets'
+    testImplementation 'io.quarkus:quarkus-junit5'
+
+    implementation group: "org.slf4j", name: "slf4j-api", version: "2.0.0-alpha1"
+    implementation group: "ch.qos.logback", name: "logback-classic", version: "1.3.0-alpha5"
+
+// You can (maybe?) figure out the format for the following deps from this url: https://frcmaven.wpi.edu/artifactory/release/edu/wpi/first/
+//      implementation group: 'edu.wpi.first.wpilibj', name: 'wpilibj-java', version: wpiVersion
+
+    def javaAndNatives = { String target, String packageName = target, String version = wpiVersion ->
+        implementation group: "edu.wpi.first.${packageName}", name: "$target-java", version: version
+        natives group: "edu.wpi.first.${packageName}", name: "$target-jni", version: version, classifier: "${platform}x86-64"
+        natives group: "edu.wpi.first.${packageName}", name: "$target-cpp", version: version, classifier: "${platform}x86-64static", ext: "zip"
+    }
+
+    javaAndNatives "ntcore"
+    javaAndNatives "wpiutil"
+}
+
+// Retrieve all deps from the 'natives' configuration we created earlier in the 'configurations' closure
+def nativesFiles = {
+    def config = configurations.getByName("natives")
+    def deps = config.dependencies.toArray(new Dependency[0])
+    config.files(deps)
+}
+// Map the downloaded 'natives' deps to their native files, and flat map them into a directory
+task extractNatives(type: Copy) {
+    nativesFiles().each {
+        from zipTree(it)
+    }
+    include '**/*.a'
+    include "**/*.so"
+    eachFile {
+        path = name
+    }
+    includeEmptyDirs = false
+
+    into extractDir
+}
+tasks.withType(JavaExec) {
+    dependsOn tasks.extractNatives
+    systemProperty 'java.library.path', "${System.getProperty("java.library.path")}${File.pathSeparator}${extractDir}"
+
+    args << "-Djava.library.path=${System.getProperty("java.library.path")}${File.pathSeparator}${extractDir}"
+}
+
+compileJava {
+//    options.properties["java.library.path"] = "-Djava.library.path=${options.properties["java.library.path"]}${File.pathSeparator}${extractDir}"
+}
+
+quarkusDev {
+    jvmArgs = ["-Djava.library.path=${System.getProperty("java.library.path")}${File.pathSeparator}${extractDir}"]
+}
+
+group 'com.squedgy'
+version '1.0.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+compileJava {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << '-parameters'
+}
+
+compileTestJava {
+    options.encoding = 'UTF-8'
+}
