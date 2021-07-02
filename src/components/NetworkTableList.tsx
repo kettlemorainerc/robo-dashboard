@@ -29,27 +29,23 @@ export function NetworkTableList() {
 	
 }
 
-function NTCheckbox() {
-
-}
-
 interface BooleanNTInputProps extends SharedInputProps<boolean> {
-	checked: boolean
+	checked?: boolean
 	label: React.ReactNode
 	// Technically RADIO should get a value, but we're not using form data... so it'd be redundant
 	type: "checkbox" | "radio"
 	name: string
 }
 
-export function BooleanNTInput(props: BooleanNTInputProps) {
-	const {label, onChange, id: givenId, ...nativeProps} = props;
+function BooleanNTInput(props: BooleanNTInputProps) {
+	const {label, onChange, id: givenId, checked = false, type, ...nativeProps} = props;
 	const id = useArbitraryId();
 	const labelId = `${id}-label`
 	console.log("bool nt input", props);
 	return (
-		<div className="nt-field">
+		<div className={"nt-field " + type}>
 			<label htmlFor={id} id={labelId}>{label}</label>
-			<input id={id} onChange={e => onChange(e.target.checked)} {...nativeProps} />
+			<input id={id} onChange={e => onChange(e.target.checked)} type={type} checked={checked} {...nativeProps} />
 		</div>
 	)
 }
@@ -62,19 +58,20 @@ interface SharedInputProps<V> extends Pick<InputHTMLAttributes<HTMLInputElement>
 }
 
 interface NTInputProps extends SharedInputProps<string> {
-	value: string
+	value?: string
 	type: "text" | "number"
 }
 
-export function NTInput(props: NTInputProps) {
-	const {label, onChange, type, id: givenId, ...nativeProps} = props;
+function NTInput(props: NTInputProps) {
+	// the value = "" is setting value to "" if and ONLY IF value is undefined
+	const {label, onChange, type, id: givenId, value = "", ...nativeProps} = props;
 	const id = useArbitraryId(givenId);
 	const labelId = `${id}-label`;
 
 	return (
-		<div className="nt-field">
+		<div className={"nt-field " + type}>
 			<label htmlFor={id} id={labelId}>{label}</label>
-			<input id={id} type={type} style={{flex: "0 0 auto"}} onChange={e => onChange(e.target.value)} {...nativeProps} />
+			<input id={id} type={type} onChange={e => onChange(e.target.value)} value={value} {...nativeProps} />
 		</div>
 	)
 }
@@ -84,7 +81,7 @@ function isBooleanArrayView(props: NTArrayViewProps<any>): props is NTArrayViewP
 }
 
 // TODO: Figure out a way/form to define expected array sizes and a way to map an index to a label/displayName
-export function BooleanArrayView(props: NTArrayViewProps<boolean> & {value: boolean[], onChange(checked: boolean[]): void}) {
+function BooleanArrayView(props: NTArrayViewProps<boolean> & {value: boolean[], onChange(checked: boolean[]): void}) {
 	const onChange = useCallback((idx: number, update: boolean) => {
 		let copy = [...props.value];
 		// console.log({copy});
@@ -118,7 +115,7 @@ export function BooleanArrayView(props: NTArrayViewProps<boolean> & {value: bool
 	);
 }
 
-export function ArrayView<V extends string | number>(props: NTArrayViewProps<V> & {value: V[], onChange(val: V[]): void}) {
+function ArrayView<V extends string | number>(props: NTArrayViewProps<V> & {value: V[], onChange(val: V[]): void}) {
 	const onChange = useCallback((idx: number, val: V) => {
 		const copy = [...props.value];
 
@@ -131,7 +128,7 @@ export function ArrayView<V extends string | number>(props: NTArrayViewProps<V> 
 		<>
 			{props.value.map((val, idx) => (
 				<NTInput
-					label={idx}
+					label={idx === 0 ? "This is a long label" : idx}
 					type={props.childType as any}
 					value={val as any}
 					onChange={val => onChange(idx, val as V)}
@@ -152,7 +149,7 @@ interface NTArrayViewProps<V extends Exclude<NTMessValue, Array<any>>> extends N
 export function NTArrayView<V extends Exclude<NTMessValue, any[]>>(props: NTArrayViewProps<V>) {
 	const {targetNTKey, childTable, ntTable, childType} = props;
 	const key = childType === "radio" || childType === "checkbox" ? "boolean" : childType === "text" ? "string" : "double";
-	const [value, setValue] = useNetworkTableValue<`${typeof key}[]`, any>(targetNTKey, `${key}[]`, childTable, ntTable);
+	const [value, setValue] = useNetworkTableValue<`${typeof key}[]`, any[]>(targetNTKey, `${key}[]`, childTable, ntTable);
 
 	let children: React.ReactNode;
 	// 0 and undefined is also falsy
@@ -173,4 +170,20 @@ export function NTArrayView<V extends Exclude<NTMessValue, any[]>>(props: NTArra
 			{children}
 		</Accordion>
 	)
+}
+
+interface NTViewProps<V extends Exclude<NTMessValue, Array<any>>> extends NetworkTableComponentProps {
+	childType: KeysOfType<V, InputTypeToType>
+}
+
+export function NTView<V extends Exclude<NTMessValue, Array<any>>>(props: NTViewProps<V>) {
+	const {childType, targetNTKey, childTable, ntTable} = props;
+	const key = childType === "radio" || childType === "checkbox" ? "boolean" : childType === "text" ? "string" : "double";
+	const [value, setValue] = useNetworkTableValue<`${typeof key}`, V>(targetNTKey, key, childTable, ntTable);
+
+	if(childType === "checkbox" || childType === "radio") {
+		return <BooleanNTInput label={targetNTKey} name={targetNTKey} type={childType} checked={value as any} onChange={setValue as any} />
+	} else {
+		return <NTInput label={targetNTKey} onChange={setValue as any} value={value as any} type={childType as any} />
+	}
 }

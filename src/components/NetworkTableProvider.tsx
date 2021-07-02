@@ -149,11 +149,11 @@ export function useNetworkTableValue<Type extends NTMessType, Value extends NTMe
 	type: Type,
 	childNetworkTable: string = "",
 	baseNetworkTable = "SmartDashboard"
-): [Value | null, (val: Value) => void] {
-	type Target = Value | null; // Just a local type reference
+): [Value | undefined, (val: Value) => void] {
+	type Target = Value | undefined; // Just a local type reference
 
 	const nt = useNetworkTable<Type, Value>();
-	const [value, setValue] = useState<Target>(null);
+	const [value, setValue] = useState<Target>();
 	// transform the key into the way Network Tables/SmartDashboard utilize "tables"
 	const actualKey = `/${baseNetworkTable}/${childNetworkTable}${childNetworkTable ? "/" : ""}${key}`;
 

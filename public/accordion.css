@@ -1,0 +1,59 @@
+.accordion {
+	border: 1px solid rgba(120, 120, 120, .5);
+}
+
+.accordion > .button {
+	border-bottom: 1px solid rgba(120, 120, 120, .5);
+	padding: .5rem;
+	display: flex;
+	/* flex-flow: row wrap; */
+}
+
+.accordion > .button > .label {
+	flex: 1 1 100%;
+}
+
+.accordion > .button > .identifier {
+	flex: 0 0 auto;
+}
+
+.accordion > .content {
+	display: none;
+	overflow-y: hidden;
+	height: 0;
+	padding: .5rem .5rem 0 .5rem;
+	transition-duration: 1s;
+	transition-property: height;
+	justify-items: baseline;
+	/* max-width: 100%;
+	width: 100%; */
+}
+
+.accordion > .button[aria-expanded=true] + .content {
+	display: flex;
+	flex-flow: row wrap;
+	height: auto;
+}
+
+.accordion > .content > .nt-field {
+	flex: 1 1 calc(50% - 1rem);
+	align-self: flex-end;
+	/* width: calc(100% - 1rem); */
+	/* margin-left: .5rem;
+	margin-right: .5rem; */
+}
+
+.accordion > .content > .nt-field.checkbox,
+.accordion > .content > .nt-field.radio {
+	flex-basis: 0;
+	/* width: calc(100% - 1rem); */
+	/* margin-left: .5rem;
+	margin-right: .5rem; */
+}
+
+/* @media screen and (min-width: 64em) {
+	.accordion > .content > .nt-field {
+		flex-basis: 0;
+		/* width: auto;
+	}
+} */
