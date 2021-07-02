@@ -4,9 +4,9 @@
   "description": "Robot control dashboard boilerplate for FRC.",
   "main": "native/main.js",
   "scripts": {
-    "start": "electron .",
+    "start": "nodemon --exec \"electron --disable-gpu .\"",
     "compile": "esbuild --bundle src/index.tsx --outfile=build/build.js",
-	"compile-watch": "npm run compile -- --watch",
+    "compile-watch": "npm run compile -- --watch",
     "display": "run-p -rl compile-watch start",
     "package-mac": "electron-packager . --platform=darwin --icon=images/icon.icns --out dist/",
     "package-linux": "electron-packager . --platform=linux --icon=images/icon.png --out dist/",
@@ -24,10 +24,12 @@
   "homepage": "http://frcdashboard.github.io",
   "dependencies": {
     "@frc-web-components/frc-web-components": "^1.1.7",
-    "wpilib-nt-client": "^1.7.1",
+    "@types/ws": "^7.4.5",
     "electron": "^7.1.5",
     "react": "17.0.2",
-    "react-dom": "17.0.2"
+    "react-dom": "17.0.2",
+    "wpilib-nt-client": "^1.7.1",
+    "ws": "^7.5.1"
   },
   "devDependencies": {
     "electron-packager": "^14.1.1",
@@ -36,6 +38,14 @@
     "@types/react": "17.0.11",
     "@types/react-dom": "17.0.8",
     "require": "2.4.20",
-    "esbuild": "0.12.12"
+    "esbuild": "0.12.12",
+    "nodemon": "2.0.9"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "src/*",
+      "public/*",
+      "build/*"
+    ]
   }
 }

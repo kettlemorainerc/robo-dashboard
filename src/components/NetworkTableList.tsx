@@ -1,9 +1,12 @@
 import React, { InputHTMLAttributes, useCallback } from "react";
-import { useNetworkTableValue } from "./NetworkTableProvider";
+import { NTMessValue, useNetworkTableValue } from "./NetworkTableProvider";
 import { Accordion } from "./Accordion";
 import { useArbitraryId } from "src/uuid";
 
 type InputTypeToType = {text: string, number: number, radio: boolean, checkbox: boolean};
+type TypeToTypeString = {string: string, double: number, boolean: boolean};
+type KeyWithType<O, T> = {[K in keyof O]: O[K] extends T ? K : never}[keyof O];
+
 type NameTypeToConverter = {[K in keyof InputTypeToType]: (a: any) => InputTypeToType[K]};
 const inputTypeToValueConverter: NameTypeToConverter = {
 	text: a => typeof a === "string" ? a : `${a}`,
@@ -42,7 +45,7 @@ export function BooleanNTInput(props: BooleanNTInputProps) {
 	const {label, onChange, id: givenId, ...nativeProps} = props;
 	const id = useArbitraryId();
 	const labelId = `${id}-label`
-
+	console.log("bool nt input", props);
 	return (
 		<div className="nt-field">
 			<label htmlFor={id} id={labelId}>{label}</label>
@@ -96,6 +99,8 @@ export function BooleanArrayView(props: NTArrayViewProps<boolean> & {value: bool
 		}
 	}, [props.onChange, props.value]);
 
+	console.log("Bool Arr View", props);
+
 	return (
 		<>
 			{props.value.map((checked, idx) => (
@@ -106,7 +111,7 @@ export function BooleanArrayView(props: NTArrayViewProps<boolean> & {value: bool
 					onChange={val => onChange(idx, val)}
 					checked={checked}
 					id={`${props.targetNTKey}-${idx}`}
-					key={idx} // generally frowned upon, but it's find since the Index is literally the ONLY identifier for this value on this side
+					key={idx} // generally frowned upon, but it's fine since the Index is literally the ONLY identifier for this value on this side
 				/>
 			))}
 		</>
@@ -130,6 +135,7 @@ export function ArrayView<V extends string | number>(props: NTArrayViewProps<V> 
 					type={props.childType as any}
 					value={val as any}
 					onChange={val => onChange(idx, val as V)}
+					key={idx}
 				/>
 			))}
 		</>
@@ -139,13 +145,14 @@ export function ArrayView<V extends string | number>(props: NTArrayViewProps<V> 
 
 type KeysOfType<Type, Within> = {[K in keyof Within]: Within[K] extends Type ? K : never}[keyof Within]
 
-interface NTArrayViewProps<V extends InputTypeToType[keyof InputTypeToType]> extends NetworkTableComponentProps {
+interface NTArrayViewProps<V extends Exclude<NTMessValue, Array<any>>> extends NetworkTableComponentProps {
 	childType: KeysOfType<V, InputTypeToType>
 }
 
-export function NTArrayView<V extends InputTypeToType[keyof InputTypeToType]>(props: NTArrayViewProps<V>) {
-	const {targetNTKey, childTable, ntTable} = props;
-	const [value, setValue] = useNetworkTableValue<V[]>(targetNTKey, val => val.map(inputTypeToValueConverter[props.childType]), childTable, ntTable);
+export function NTArrayView<V extends Exclude<NTMessValue, any[]>>(props: NTArrayViewProps<V>) {
+	const {targetNTKey, childTable, ntTable, childType} = props;
+	const key = childType === "radio" || childType === "checkbox" ? "boolean" : childType === "text" ? "string" : "double";
+	const [value, setValue] = useNetworkTableValue<`${typeof key}[]`, any>(targetNTKey, `${key}[]`, childTable, ntTable);
 
 	let children: React.ReactNode;
 	// 0 and undefined is also falsy

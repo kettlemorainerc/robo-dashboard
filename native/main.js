@@ -11,8 +11,9 @@ const watchTargets = [
 
 const fs = require("fs");
 const electron = require('electron');
-const wpilib_NT = require('wpilib-nt-client');
-const client = new wpilib_NT.Client();
+// const wpilib_NT = require('wpilib-nt-client');
+// const client = new wpilib_NT.Client();
+// console.log(Object.getOwnPropertyDescriptors(wpilib_NT.Client));
 
 watchTargets.forEach(file => {
 	const watcher = fs.watchFile(file, {interval: 100, persistent: false}, (curr, prev) => {
@@ -21,7 +22,7 @@ watchTargets.forEach(file => {
 })
 
 // The client will try to reconnect after 1 second
-client.setReconnectDelay(1000)
+// client.setReconnectDelay(1000);
 
 /** Module to control application life. */
 const app = electron.app;
@@ -40,76 +41,76 @@ const ipc = electron.ipcMain;
  * */
 let mainWindow;
 
-let connectedFunc,
-    ready = false;
+// let connectedFunc,
+//     ready = false;
 
-let clientDataListener = (key, val, valType, mesgType, id, flags) => {
-	console.log("network update", mesgType, id, key, val, valType)
-    if (val === 'true' || val === 'false') {
-        val = val === 'true';
-    }
-    mainWindow.webContents.send(mesgType, {
-        key,
-        val,
-        valType,
-        id,
-        flags
-    });
-};
+// let clientDataListener = (key, val, valType, mesgType, id, flags) => {
+//     if (val === 'true' || val === 'false') {
+//         val = val === 'true';
+//     }
+//     mainWindow.webContents.send(mesgType, {
+//         key,
+//         val,
+//         valType,
+//         id,
+//         flags
+//     });
+// };
 function createWindow() {
     // Attempt to connect to the localhost
-    client.start((con, err) => {
+	// client.startDebug("NT client", 3)
+    // client.start((con, err) => {
 
-        let connectFunc = () => {
-            console.log('Sending status');
-            mainWindow.webContents.send('connected', con);
+    //     let connectFunc = () => {
+    //         console.log('Sending status');
+    //         mainWindow.webContents.send('connected', con);
 
-            // Listens to the changes coming from the client
-        };
+    //         // Listens to the changes coming from the client
+    //     };
 
-        // If the Window is ready than send the connection status to it
-        if (ready) {
-            connectFunc();
-        }
-        connectedFunc = connectFunc;
-    });
+    //     // If the Window is ready than send the connection status to it
+    //     if (ready) {
+    //         connectFunc();
+    //     }
+    //     connectedFunc = connectFunc;
+    // });
     // When the script starts running in the window set the ready variable
-    ipc.on('ready', (ev, mesg) => {
-        console.log('NetworkTables is ready');
-        ready = mainWindow != null;
+    // ipc.on('ready', (ev, mesg) => {
+    //     console.log('NetworkTables is ready');
+    //     ready = mainWindow != null;
 
-        // Remove old Listener
-        client.removeListener(clientDataListener);
+    //     // Remove old Listener
+    //     client.removeListener(clientDataListener);
 
-        // Add new listener with immediate callback
-        client.addListener(clientDataListener, true);
+    //     // Add new listener with immediate callback
+    //     client.addListener(clientDataListener, true);
 
-        // Send connection message to the window if if the message is ready
-        if (connectedFunc) connectedFunc();
-    });
-    // When the user chooses the address of the bot than try to connect
-    ipc.on('connect', (ev, address, port) => {
-        console.log(`Trying to connect to ${address}` + (port ? ':' + port : ''));
-        let callback = (connected, err) => {
-            console.log('Sending status');
-            mainWindow.webContents.send('connected', connected);
-        };
-        if (port) {
-            client.start(callback, address, port);
-        } else {
-            client.start(callback, address);
-        }
-    });
-    ipc.on('add', (ev, mesg) => {
-        client.Assign(mesg.val, mesg.key, (mesg.flags & 1) === 1);
-    });
-    ipc.on('update', (ev, mesg) => {
-		console.log("received update", mesg.id, mesg.key, mesg.val);
-        client.Update(mesg.id, mesg.val);
-    });
-    ipc.on('windowError', (ev, error) => {
-        console.log(error);
-    });
+    //     // Send connection message to the window if if the message is ready
+    //     if (connectedFunc) connectedFunc();
+    // });
+    // // When the user chooses the address of the bot than try to connect
+    // ipc.on('connect', (ev, address, port) => {
+    //     console.log(`Trying to connect to ${address}` + (port ? ':' + port : ''));
+    //     let callback = (connected, err) => {
+    //         console.log('Sending status');
+    //         mainWindow.webContents.send('connected', connected);
+    //     };
+    //     if (port) {
+    //         client.start(callback, address, port);
+    //     } else {
+    //         client.start(callback, address);
+    //     }
+    // });
+    // ipc.on('add', (ev, mesg) => {
+    //     client.Assign(mesg.val, mesg.key, (mesg.flags & 1) === 1);
+    // });
+    // ipc.on('update', (ev, mesg) => {
+	// 	console.log("received update", mesg.id, mesg.key, mesg.val);
+    //     client.Update(mesg.id, mesg.val);
+    // });
+    // ipc.on('windowError', (ev, error) => {
+    //     console.log(error);
+    // });
     // Create the browser window.
     mainWindow = new BrowserWindow({
         width: 1366,
@@ -145,9 +146,9 @@ function createWindow() {
         // in an array if your app supports multi windows, this is the time
         // when you should delete the corresponding element.
         mainWindow = null;
-        ready = false;
-        connectedFunc = null;
-        client.removeListener(clientDataListener);
+        // ready = false;
+        // connectedFunc = null;
+        // client.removeListener(clientDataListener);
     });
     mainWindow.on('unresponsive', () => {
         console.log('Main Window is unresponsive');
@@ -189,3 +190,8 @@ app.on('activate', function () {
     // dock icon is clicked and there are no other windows open.
     if (mainWindow == null) createWindow();
 });
+
+process.on("SIGINT", () => {
+	console.log("killing");
+	if(mainWindow) mainWindow.destroy();
+})
