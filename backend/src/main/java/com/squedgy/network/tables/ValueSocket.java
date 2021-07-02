@@ -48,7 +48,7 @@ public class ValueSocket {
         Message toSend = messageFor(key, value);
         if(toSend == null) return;
         String sending = mapper.writeValueAsString(toSend);
-        LOG.info("Sending message to connected sessions: {}", sending);
+        LOG.info("Sending message to connected sessions: [\"{}\"<{}>: {}]", key, value.getType(), value.getValue());
         for(Session sess : sessions) sess.getAsyncRemote().sendObject(sending);
     }
 

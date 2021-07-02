@@ -1,5 +1,5 @@
 {
-  "name": "FRCDashboard",
+  "name": "@2077/robo-dashboard",
   "version": "2.1.0",
   "description": "Robot control dashboard boilerplate for FRC.",
   "main": "native/main.js",
@@ -7,19 +7,20 @@
     "start": "nodemon --exec \"electron --disable-gpu .\"",
     "compile": "esbuild --bundle src/index.tsx --outfile=build/build.js",
     "compile-watch": "npm run compile -- --watch",
-    "display": "run-p -rl compile-watch start",
+	"start-backend": "cd ../backend; nodemon --exec \"./gradlew quarkusDev\" --watch ../backend/src/",
+    "display": "run-p -rl compile-watch start-backend start",
     "package-mac": "electron-packager . --platform=darwin --icon=images/icon.icns --out dist/",
     "package-linux": "electron-packager . --platform=linux --icon=images/icon.png --out dist/",
     "package-win": "electron-packager . --platform=win32 --icon=images/icon.ico --out dist/"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/FRCDashboard/FRCDashboard"
+    "url": "git+https://github.com/kettlemorainerc/robo-dashboard"
   },
   "author": "Erik Boesen",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/FRCDashboard/FRCDashboard/issues"
+    "url": "https://github.com/kettlemorainerc/robo-dashboard/issues"
   },
   "homepage": "http://frcdashboard.github.io",
   "dependencies": {
