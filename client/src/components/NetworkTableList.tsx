@@ -1,4 +1,4 @@
-import React, {InputHTMLAttributes, useCallback, useMemo, useRef} from "react";
+import React, {forwardRef, InputHTMLAttributes, useCallback, useMemo, useRef} from "react";
 import {NTMessValue, useNetworkTableValue} from "./NetworkTableProvider";
 import {Accordion} from "./Accordion";
 import {useArbitraryId} from "src/uuid";
@@ -42,7 +42,7 @@ interface BooleanNTInputProps extends SharedInputProps<boolean> {
 	name: string
 }
 
-function BooleanNTInput(props: BooleanNTInputProps) {
+const BooleanNTInput = forwardRef(function BooleanNTInput(props: BooleanNTInputProps, ref: React.Ref<HTMLDivElement>) {
 	const {label, onChange, id: givenId, checked = false, type, ...nativeProps} = props;
 	const id = useArbitraryId();
 	const labelId = `${id}-label`;
@@ -74,12 +74,12 @@ function BooleanNTInput(props: BooleanNTInputProps) {
 	) : label;
 
 	return (
-		<div className={"nt-field " + type}>
+		<div className={"nt-field " + type} ref={ref}>
 			<label htmlFor={id} id={labelId}>{localLabel}</label>
 			<input id={id} onChange={e => setLocalChecked(e.target.checked)} type={type} checked={localChecked} {...nativeProps} />
 		</div>
 	)
-}
+});
 
 interface SharedInputProps<V> extends Pick<InputHTMLAttributes<HTMLInputElement>, "name"> {
 	label: React.ReactNode
@@ -93,7 +93,7 @@ interface NTInputProps extends SharedInputProps<string> {
 	type: "text" | "number"
 }
 
-function NTInput(props: NTInputProps) {
+const NTInput = forwardRef(function NTInput(props: NTInputProps, ref: React.Ref<HTMLDivElement>) {
 	// the value = "" is setting value to "" if and ONLY IF value is undefined
 	const {label, onChange, type, id: givenId, value = "", ...nativeProps} = props;
 	const id = useArbitraryId(givenId);
@@ -126,12 +126,12 @@ function NTInput(props: NTInputProps) {
 	) : label;
 
 	return (
-		<div className={"nt-field " + type}>
+		<div className={"nt-field " + type} ref={ref}>
 			<label htmlFor={id} id={labelId}>{localLabel}</label>
 			<input id={id} type={type} onChange={e => setLocalValue(e.target.value)} value={localValue} {...nativeProps} />
 		</div>
 	)
-}
+});
 
 function isBooleanArrayView(props: NTArrayViewProps<any>): props is NTArrayViewProps<boolean> {
 	return props.childType === "checkbox" || props.childType === "radio";
@@ -314,14 +314,8 @@ export function NTView<V extends Exclude<NTMessValue, Array<any>>>(props: NTView
 
 	let children: React.ReactNode;
 	if(childType === "checkbox" || childType === "radio") {
-		children = <BooleanNTInput label={targetNTKey} name={targetNTKey} type={childType} checked={value as any} onChange={setValue as any} />
+		return <BooleanNTInput ref={ref} label={targetNTKey} name={targetNTKey} type={childType} checked={value as any} onChange={setValue as any} />
 	} else {
-		children = <NTInput label={targetNTKey} onChange={setValue as any} value={value as any} type={childType as any} />
+		return <NTInput ref={ref} label={targetNTKey} onChange={setValue as any} value={value as any} type={childType as any} />
 	}
-
-	return (
-		<div ref={ref}>
-			{children}
-		</div>
-	);
 }

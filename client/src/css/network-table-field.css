@@ -1,0 +1,41 @@
+.nt-field {
+	display: flex;
+	flex: 1 0 50%;
+	flex-flow: row wrap;
+	padding: .5rem;
+	padding-bottom: 0;
+
+	margin-bottom: 1rem;
+}
+
+.nt-field > label {
+	flex: 0 0 auto;
+	width: max-content;
+	padding-right: .5rem;
+	display: inline-flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.nt-field > input {
+	flex: 1 0 50%;
+
+	max-width: calc(100% - 1rem);
+	width: 100%;
+	min-width: 4rem;
+	display: inline-block;
+}
+
+.nt-field.checkbox, .nt-field.radio {
+	flex-wrap: nowrap;
+}
+
+.nt-field > [type=checkbox],
+.nt-field > [type=radio] {
+	flex: 0 0 auto;
+	width: min-content;
+	min-width: min-content;
+	margin: .25rem .5rem;
+	height: 2ex;
+	/* width: 2ex; */
+}

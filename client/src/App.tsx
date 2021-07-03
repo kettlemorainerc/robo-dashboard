@@ -22,7 +22,7 @@ export function App() {
 		{key: "Doubles", type: "double[]", childType: "number"},
 	]);
 
-	const move = useCallback((from: number, to: number) => { // This assumes you're switching between the current target and 1 above or 1 below it
+	const move = useCallback((from: number, to: number) => {
 		setKeys(keys => {
 			const early = from > to ? to : from; // get the smaller index
 			const late = early === from ? to : from; // larger index
@@ -31,9 +31,10 @@ export function App() {
 			const b = keys[late];
 
 			const before = keys.slice(0, early);
+			const between = keys.slice(early + 1, late);
 			const after = keys.slice(late + 1);
 
-			return [...before, b, a, ...after];
+			return [...before, b, ...between, a, ...after];
 		});
 	}, [setKeys]);
 
