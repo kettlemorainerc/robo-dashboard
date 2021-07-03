@@ -18,11 +18,16 @@ import java.util.*;
 import static com.squedgy.network.tables.NetworkUtilities.*;
 import static org.slf4j.LoggerFactory.*;
 
+/**
+ * This handles the WebSocket connection. Originally designed to work with our modified version of FRCDashboard (robo-dashboard).
+ *
+ */
 @ApplicationScoped
 @ServerEndpoint("/")
 public class ValueSocket {
     private static final Logger LOG = getLogger(ValueSocket.class);
     public static final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
+//    public static final
     private static final Set<Session> sessions = new HashSet<>();
     private static Optional<Integer> handlerId = Optional.empty();
 

@@ -90,6 +90,10 @@ java {
     targetCompatibility = JavaVersion.VERSION_11
 }
 
+test {
+    systemProperty 'java.library.path', "${System.getProperty("java.library.path")}${File.pathSeparator}${extractDir}"
+}
+
 compileJava {
     options.encoding = 'UTF-8'
     options.compilerArgs << '-parameters'

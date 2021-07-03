@@ -7,6 +7,14 @@ import java.util.*;
 public class BooleanMessage extends NetworkTableMessage<Boolean> {
     private static final String type = "boolean";
 
+    public static BooleanMessage get(String key) {
+        return new BooleanMessage(Type.GET, key, false);
+    }
+
+    public static BooleanMessage set(String key, boolean value) {
+        return new BooleanMessage(Type.SET, key, value);
+    }
+
     public BooleanMessage(Type messageType, String key, boolean value) {
         super(messageType, key, value, NetworkUtilities::getBoolean, NetworkUtilities::setBoolean);
     }
@@ -16,7 +24,7 @@ public class BooleanMessage extends NetworkTableMessage<Boolean> {
         return type;
     }
 
-    protected NetworkTableMessage<Boolean> withValue(Boolean value) {
+    public NetworkTableMessage<Boolean> withValue(Boolean value) {
         return new BooleanMessage(messageType, key, value);
     }
 
