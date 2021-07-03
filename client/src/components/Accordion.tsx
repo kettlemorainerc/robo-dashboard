@@ -1,14 +1,19 @@
-import React, { PropsWithChildren, useReducer, ReactNode } from "react";
+import React, {forwardRef, Ref, PropsWithChildren, useReducer, ReactNode} from "react";
 import { useArbitraryId } from "src/uuid";
 
-export function Accordion({children, label}: PropsWithChildren<{label: ReactNode}>) {
+interface AccordionProps {
+	label: React.ReactChild
+	children: React.ReactNode | React.ReactNodeArray
+}
+
+export const Accordion = forwardRef(function Accordion({children, label}: AccordionProps, ref: Ref<HTMLDivElement>) {
 	const [open, flipOpen] = useReducer(a => !a, false);
 	const id = useArbitraryId();
 	const contentId = `${id}-content`;
 	const buttonId = `${id}-button`;
 	
 	return (
-		<div className="accordion">
+		<div className="accordion" ref={ref}>
 			<div
 				aria-controls={contentId}
 				aria-expanded={open}
@@ -37,4 +42,4 @@ export function Accordion({children, label}: PropsWithChildren<{label: ReactNode
 			</div>
 		</div>
 	)
-}
+});

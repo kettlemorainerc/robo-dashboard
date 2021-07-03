@@ -1,11 +1,16 @@
-import React, { InputHTMLAttributes, useCallback } from "react";
-import { NTMessValue, useNetworkTableValue } from "./NetworkTableProvider";
-import { Accordion } from "./Accordion";
-import { useArbitraryId } from "src/uuid";
-import { useState } from "react";
-import { useEffect } from "react";
+import React, {InputHTMLAttributes, useCallback, useMemo, useRef} from "react";
+import {NTMessValue, useNetworkTableValue} from "./NetworkTableProvider";
+import {Accordion} from "./Accordion";
+import {useArbitraryId} from "src/uuid";
+import {useState} from "react";
+import {useEffect} from "react";
+import {LoadingIcon} from "./LoadingIcon";
+import {useDrag, useDrop, DropTargetMonitor} from "react-dnd";
+import {XYCoord} from "dnd-core";
 
 type InputTypeToType = {text: string, number: number, radio: boolean, checkbox: boolean};
+
+export type NTInputTypes = keyof InputTypeToType;
 
 type NameTypeToConverter = {[K in keyof InputTypeToType]: (a: any) => InputTypeToType[K]};
 const inputTypeToValueConverter: NameTypeToConverter = {
@@ -62,9 +67,15 @@ function BooleanNTInput(props: BooleanNTInputProps) {
 		}
 	}, [localChecked]);
 
+	const localLabel = checked !== localChecked ? (
+		<>
+			{label} - <LoadingIcon width="2ex" height="2ex" style={{display:"inline-block"}} />
+		</>
+	) : label;
+
 	return (
 		<div className={"nt-field " + type}>
-			<label htmlFor={id} id={labelId}>{label}</label>
+			<label htmlFor={id} id={labelId}>{localLabel}</label>
 			<input id={id} onChange={e => setLocalChecked(e.target.checked)} type={type} checked={localChecked} {...nativeProps} />
 		</div>
 	)
@@ -108,9 +119,15 @@ function NTInput(props: NTInputProps) {
 		}
 	}, [localValue]);
 
+	const localLabel = value !== localValue ? (
+		<>
+			{label} <LoadingIcon width="1em" height="auto" style={{display:"inline-block"}} />
+		</>
+	) : label;
+
 	return (
 		<div className={"nt-field " + type}>
-			<label htmlFor={id} id={labelId}>{label}</label>
+			<label htmlFor={id} id={labelId}>{localLabel}</label>
 			<input id={id} type={type} onChange={e => setLocalValue(e.target.value)} value={localValue} {...nativeProps} />
 		</div>
 	)
@@ -179,17 +196,69 @@ function ArrayView<V extends string | number>(props: NTArrayViewProps<V> & {valu
 	);
 }
 
+interface DraggableProps {
+	move(from: number, to: number): void,
+	index: number
+
+}
+
+interface DragItem {
+  index: number
+  id: string
+  type: string
+}
+
+function useDraggable({move, index}: DraggableProps) {
+	const ref = useRef<HTMLDivElement>(null);
+	const [{handlerId}, drop] = useDrop({
+		accept: "nt-value",
+		collect(monitor) {return {handlerId: monitor.getHandlerId()};},
+		hover(item: DragItem, monitor) {
+			if(!ref.current) return;
+			const dragIndex = item.index;
+			const hoverIndex = index;
+
+			if(dragIndex === hoverIndex) return;
+
+			const hoveringRect = ref.current.getBoundingClientRect();
+			const middleY = (hoveringRect.bottom - hoveringRect.top) / 2;
+			const offset = monitor.getClientOffset();
+			const hoverY = offset!.y - hoveringRect.top;
+
+			if(
+				(dragIndex < hoverIndex && hoverY < middleY) ||
+				(dragIndex > hoverIndex && hoverY > middleY)
+			) {
+				return;
+			}
+
+			move(dragIndex, hoverIndex);
+			item.index = hoverIndex;
+		}
+	});
+
+	const [{isDragging}, drag] = useDrag({
+		type: "nt-value",
+		item: () => ({index}),
+		collect: (monitor) => ({isDragging: monitor.isDragging()})
+	});
+
+	drag(drop(ref));
+
+	return useMemo(() => ({ref, handlerId, isDragging}), [ref, handlerId, isDragging]);
+}
 
 type KeysOfType<Type, Within> = {[K in keyof Within]: Within[K] extends Type ? K : never}[keyof Within]
 
-interface NTArrayViewProps<V extends Exclude<NTMessValue, Array<any>>> extends NetworkTableComponentProps {
-	childType: KeysOfType<V, InputTypeToType>
+interface NTArrayViewProps<V extends Exclude<NTMessValue, Array<any>>> extends NetworkTableComponentProps, DraggableProps {
+	childType: KeysOfType<V, InputTypeToType> // radios should only ever be used with array types
 }
 
 export function NTArrayView<V extends Exclude<NTMessValue, any[]>>(props: NTArrayViewProps<V>) {
 	const {targetNTKey, childTable, ntTable, childType} = props;
 	const key = childType === "radio" || childType === "checkbox" ? "boolean" : childType === "text" ? "string" : "double";
 	const [value, setValue] = useNetworkTableValue<`${typeof key}[]`, any[]>(targetNTKey, `${key}[]`, childTable, ntTable);
+	const {ref} = useDraggable(props);
 
 	let children: React.ReactNode;
 	// 0 and undefined is also falsy
@@ -225,25 +294,34 @@ export function NTArrayView<V extends Exclude<NTMessValue, any[]>>(props: NTArra
 		</>
 	);
 
+
 	return (
-		<Accordion label={label}>
+		<Accordion label={label} ref={ref}>
 			{children}
 		</Accordion>
 	)
 }
 
-interface NTViewProps<V extends Exclude<NTMessValue, Array<any>>> extends NetworkTableComponentProps {
-	childType: KeysOfType<V, InputTypeToType>
+interface NTViewProps<V extends Exclude<NTMessValue, Array<any>>> extends NetworkTableComponentProps, DraggableProps {
+	childType: Exclude<KeysOfType<V, InputTypeToType>, "radio">
 }
 
 export function NTView<V extends Exclude<NTMessValue, Array<any>>>(props: NTViewProps<V>) {
 	const {childType, targetNTKey, childTable, ntTable} = props;
-	const key = childType === "radio" || childType === "checkbox" ? "boolean" : childType === "text" ? "string" : "double";
+	const key = childType === "checkbox" ? "boolean" : childType === "text" ? "string" : "double";
 	const [value, setValue] = useNetworkTableValue<`${typeof key}`, V>(targetNTKey, key, childTable, ntTable);
+	const {ref} = useDraggable(props);
 
+	let children: React.ReactNode;
 	if(childType === "checkbox" || childType === "radio") {
-		return <BooleanNTInput label={targetNTKey} name={targetNTKey} type={childType} checked={value as any} onChange={setValue as any} />
+		children = <BooleanNTInput label={targetNTKey} name={targetNTKey} type={childType} checked={value as any} onChange={setValue as any} />
 	} else {
-		return <NTInput label={targetNTKey} onChange={setValue as any} value={value as any} type={childType as any} />
+		children = <NTInput label={targetNTKey} onChange={setValue as any} value={value as any} type={childType as any} />
 	}
+
+	return (
+		<div ref={ref}>
+			{children}
+		</div>
+	);
 }

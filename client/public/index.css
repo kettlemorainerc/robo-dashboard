@@ -103,8 +103,10 @@ div#wrapper {
 	flex: 0 0 auto;
 	width: max-content;
 	padding-right: .5rem;
-	overflow: auto;
-	display: inline-block;
+	/* overflow: auto; */
+	display: inline-flex;
+	align-items: center;
+	justify-content: space-between;
 }
 
 .nt-field > input {

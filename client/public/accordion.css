@@ -43,13 +43,13 @@
 	margin-right: .5rem; */
 }
 
-.accordion > .content > .nt-field.checkbox,
+/* .accordion > .content > .nt-field.checkbox,
 .accordion > .content > .nt-field.radio {
 	flex-basis: 0;
 	/* width: calc(100% - 1rem); */
 	/* margin-left: .5rem;
 	margin-right: .5rem; */
-}
+} */
 
 /* @media screen and (min-width: 64em) {
 	.accordion > .content > .nt-field {
