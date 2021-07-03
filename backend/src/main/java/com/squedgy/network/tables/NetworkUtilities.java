@@ -1,10 +1,8 @@
 package com.squedgy.network.tables;
 
-import com.squedgy.network.tables.message.*;
 import edu.wpi.first.networktables.*;
-import org.apache.http.cookie.*;
 
-import java.util.*;
+import java.util.function.*;
 
 import static edu.wpi.first.networktables.EntryListenerFlags.*;
 
@@ -15,168 +13,123 @@ import static edu.wpi.first.networktables.EntryListenerFlags.*;
  */
 public final class NetworkUtilities {
     private static final NetworkTableInstance NETWORK_TABLE = NetworkTableInstance.getDefault();
-    private static final Map<String, NetworkTable> CACHED_TABLES = new HashMap<>();
-    public static final String SMART_DASHBOARD_NAME = "SmartDashboard";
-    static {
-        NETWORK_TABLE.startServer();
-        NETWORK_TABLE.startClient();
-        CACHED_TABLES.put(SMART_DASHBOARD_NAME, NETWORK_TABLE.getTable(SMART_DASHBOARD_NAME));
-//        NETWORK_TABLE.startClient("127.0.0.1");
+
+    public static void initializeNT() {
+        NETWORK_TABLE.startServer("networktables.ini", "127.0.0.1", NetworkTableInstance.kDefaultPort);
+//        NETWORK_TABLE.startClient("127.0.0.1", NetworkTableInstance.kDefaultPort);
     }
 
     private NetworkUtilities() {}
-    
-    private static NetworkTable getNetworkTable(String table) {
-        return CACHED_TABLES.computeIfAbsent(table, NETWORK_TABLE::getTable);
-    }
-
-    public static NetworkTableValue get(String table, String key) {
-        return getNetworkTable(table).getEntry(key).getValue();
-    }
 
     public static NetworkTableValue get(String key) {
-        return get(SMART_DASHBOARD_NAME, key);
+        return getEntry(key).getValue();
     }
 
-    public static void setBooleanArray(String table, String key, boolean[] val) {
-        getNetworkTable(table).getEntry(key).setBooleanArray(val);
+    public static NetworkTableEntry getEntry(String name) {
+        return NETWORK_TABLE.getEntry(name);
     }
 
     public static void setBooleanArray(String key, boolean[] val) {
-        setBooleanArray(SMART_DASHBOARD_NAME, key, val);
-    }
-
-    public static boolean[] getBooleanArray(String table, String key) {
-        return getNetworkTable(table).getEntry(key).getBooleanArray((boolean[]) null);
+        getEntry(key).setBooleanArray(val);
     }
 
     public static boolean[] getBooleanArray(String key) {
-        return getBooleanArray(SMART_DASHBOARD_NAME, key);
-    }
-
-    public static boolean getBoolean(String table, String key) {
-        return getNetworkTable(table).getEntry(key).getBoolean(false);
+        return getEntry(key).getBooleanArray((boolean[]) null);
     }
 
     public static boolean getBoolean(String key) {
-        return getBoolean(SMART_DASHBOARD_NAME, key);
-    }
-
-    public static void setBoolean(String table, String key, boolean val) {
-        getNetworkTable(table).getEntry(key).setBoolean(val);
+        return getEntry(key).getBoolean(false);
     }
 
     public static void setBoolean(String key, boolean val) {
-        setBoolean(SMART_DASHBOARD_NAME, key, val);
-    }
-
-    public static void setStringArray(String table, String key, String[] val) {
-        getNetworkTable(table).getEntry(key).setStringArray(val);
+        getEntry(key).setBoolean(val);
     }
 
     public static void setStringArray(String key, String[] val) {
-        setStringArray(SMART_DASHBOARD_NAME, key, val);
-    }
-
-    public static void setString(String table, String key, String val) {
-        getNetworkTable(table).getEntry(key).setString(val);
-    }
-
-    public static void setString(String key, String val) {
-        setString(SMART_DASHBOARD_NAME, key, val);
-    }
-
-
-    public static String[] getStringArray(String table, String key) {
-        return getNetworkTable(table).getEntry(key).getStringArray(null);
+        getEntry(key).setStringArray(val);
     }
 
     public static String[] getStringArray(String key) {
-        return getStringArray(SMART_DASHBOARD_NAME, key);
+        return getEntry(key).getStringArray(null);
     }
 
-    public static String getString(String table, String key) {
-        return getNetworkTable(table).getEntry(key).getString(null);
+    public static void setString(String key, String val) {
+        getEntry(key).setString(val);
     }
 
     public static String getString(String key) {
-        return getString(SMART_DASHBOARD_NAME, key);
-    }
-
-    public static void setDoubleArray(String table, String key, double[] val) {
-        getNetworkTable(table).getEntry(key).setDoubleArray(val);
+        return getEntry(key).getString(null);
     }
 
     public static void setDoubleArray(String key, double[] val) {
-        setDoubleArray(SMART_DASHBOARD_NAME, key, val);
-    }
-
-    public static double[] getDoubleArray(String table, String key) {
-        return getNetworkTable(table).getEntry(key).getDoubleArray((double[]) null);
+        getEntry(key).setDoubleArray(val);
     }
 
     public static double[] getDoubleArray(String key) {
-        return getDoubleArray(SMART_DASHBOARD_NAME, key);
-    }
-
-    public static double getDouble(String table, String key) {
-        return getNetworkTable(table).getEntry(key).getDouble(Double.NaN);
+        return getEntry(key).getDoubleArray((double[]) null);
     }
 
     public static double getDouble(String key) {
-        return getDouble(SMART_DASHBOARD_NAME, key);
-    }
-
-    public static void setDouble(String table, String key, double val) {
-        getNetworkTable(table).getEntry(key).setDouble(val);
+        return getEntry(key).getDouble(Double.NaN);
     }
 
     public static void setDouble(String key, double val) {
-        setDouble(SMART_DASHBOARD_NAME, key, val);
-    }
-
-    public static void togglePersist(String table, String key) {
-        NetworkTableEntry entry = getNetworkTable(table).getEntry(key);
-        if(entry.isPersistent()) entry.clearPersistent();
-        else entry.setPersistent();
+        getEntry(key).setDouble(val);
     }
 
     public static void togglePersist(String key) {
-        togglePersist(SMART_DASHBOARD_NAME, key);
+        ifOrElse(key, NetworkTableEntry::isPersistent, NetworkTableEntry::clearPersistent, NetworkTableEntry::setPersistent);
     }
 
-    public static int addListener(String table, TableEntryListener listener, int flags) {
-        return getNetworkTable(table).addEntryListener(listener, flags);
+    public static int addListener(Consumer<EntryNotification> listener, int flags) {
+        return NETWORK_TABLE.addEntryListener("", listener, flags); // getNetworkTable(table).addEntryListener(listener, flags);
     }
 
-    public static int addListener(String table, TableEntryListener listener) {
+    public static int addListener(Consumer<EntryNotification> listener) {
         int flags = kLocal | kFlags | kDelete | kNew | kUpdate;
-        return addListener(table, listener, flags);
-    }
-
-    public static int addListener(TableEntryListener listener, int flags) {
-        return addListener(SMART_DASHBOARD_NAME, listener, flags);
-    }
-
-    public static int addListener(TableEntryListener listener) {
-        int flags = kLocal | kFlags | kDelete | kNew | kUpdate;
-        System.out.println("FLAGS: " + flags);
         return addListener(listener, flags);
     }
 
-    public static void removeListener(String table, int listener) {
-        getNetworkTable(table).removeEntryListener(listener);
-    }
-
     public static void removeListener(int listener) {
-        removeListener(SMART_DASHBOARD_NAME, listener);
-    }
-
-    public static void delete(String table, String key) {
-        getNetworkTable(table).delete(key);
+        NETWORK_TABLE.removeEntryListener(listener);
     }
 
     public static void delete(String key) {
-        delete(SMART_DASHBOARD_NAME, key);
+        ifExists(key, NetworkTableEntry::delete);
+    }
+
+
+    private static void ifOrElse(
+        String key,
+        Predicate<NetworkTableEntry> only,
+        Consumer<NetworkTableEntry> then,
+        Consumer<NetworkTableEntry> orElse
+    ) {
+        NetworkTableEntry entry = NETWORK_TABLE.getEntry(key);
+        if(only.test(entry)) then.accept(entry);
+        else orElse.accept(entry);
+    }
+
+    private static <T> T ifOrElse(
+        String key,
+        Predicate<NetworkTableEntry> when,
+        T arg,
+        BiFunction<NetworkTableEntry, T, T> then,
+        BiFunction<NetworkTableEntry, T, T> orElse
+    ) {
+        NetworkTableEntry entry = NETWORK_TABLE.getEntry(key);
+        if(when.test(entry)) return then.apply(entry, arg);
+        else return orElse.apply(entry, arg);
+    }
+
+    private static void nothing(NetworkTableEntry entry) {}
+    private static <T> T nothing(NetworkTableEntry entry, T ignored) {return null;}
+
+    private static void ifExists(String key, Consumer<NetworkTableEntry> run) {
+        ifOrElse(key, NetworkTableEntry::exists, run, NetworkUtilities::nothing);
+    }
+
+    private static <T> T ifExists(String key, BiFunction<NetworkTableEntry, T, T> get, T arg) {
+        return ifOrElse(key, NetworkTableEntry::exists, arg, get, NetworkUtilities::nothing);
     }
 }

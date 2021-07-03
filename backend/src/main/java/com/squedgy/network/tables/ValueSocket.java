@@ -27,6 +27,7 @@ public class ValueSocket {
     private static Optional<Integer> handlerId = Optional.empty();
 
     public static Message messageFor(String key, NetworkTableValue value) {
+
         if(value.isBoolean()) return new BooleanMessage(Type.SET, key, getBoolean(key));
         else if(value.isBooleanArray()) return new BooleanArrayMessage(Type.SET, key, getBooleanArray(key));
         else if(value.isString()) return new StringMessage(Type.SET, key, getString(key));
@@ -37,11 +38,14 @@ public class ValueSocket {
         return null;
     }
     
-    private static void onEntryUpdate(NetworkTable table, String key, NetworkTableEntry entry, NetworkTableValue value, int flags) {
-        LOG.info("Received Entry update: {} {} {} {}", table.getPath(), key, entry, value);
+    private static void onEntryUpdate(EntryNotification notification) {
+        NetworkTableValue value = notification.value;
+
+
+        LOG.info("Received Entry update: {} {} {}", notification.name, notification.getEntry(), value.getValue());
 
         try {
-            alertListeners(key, value);
+            alertListeners(notification.getEntry().getName(), value);
         } catch(JsonProcessingException e) {
             e.printStackTrace();
         }
@@ -49,6 +53,7 @@ public class ValueSocket {
 
     void onStartup(@Observes StartupEvent ignored) {
         LOG.info("Starting app");
+        NetworkUtilities.initializeNT();
         handlerId = Optional.of(NetworkUtilities.addListener(ValueSocket::onEntryUpdate));
 
     }

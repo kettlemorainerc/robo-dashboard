@@ -24,13 +24,13 @@
   "homepage": "http://frcdashboard.github.io",
   "dependencies": {
     "@types/ws": "^7.4.5",
-    "electron": "^7.1.5",
     "react": "17.0.2",
     "react-dnd": "^14.0.2",
     "react-dom": "17.0.2",
     "ws": "^7.5.1"
   },
   "devDependencies": {
+    "electron": "^7.1.5",
     "electron-packager": "^14.1.1",
     "typescript": "4.3.4",
     "@types/react": "17.0.11",
