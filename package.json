@@ -8,7 +8,7 @@
 	  "start-backend": "cd backend; ./gradlew quarkusDev",
 	  "start-client": "node ./start-client.js",
 	  "compile-client": "npm --prefix client run compile-watch",
-	  "start": "run-p -r -l start-backend start-client"
+	  "start": "run-p -r -l start-backend start-client compile-client"
   },
   "repository": {
     "type": "git",

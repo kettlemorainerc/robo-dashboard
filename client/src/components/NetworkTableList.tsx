@@ -2,10 +2,10 @@ import React, { InputHTMLAttributes, useCallback } from "react";
 import { NTMessValue, useNetworkTableValue } from "./NetworkTableProvider";
 import { Accordion } from "./Accordion";
 import { useArbitraryId } from "src/uuid";
+import { useState } from "react";
+import { useEffect } from "react";
 
 type InputTypeToType = {text: string, number: number, radio: boolean, checkbox: boolean};
-type TypeToTypeString = {string: string, double: number, boolean: boolean};
-type KeyWithType<O, T> = {[K in keyof O]: O[K] extends T ? K : never}[keyof O];
 
 type NameTypeToConverter = {[K in keyof InputTypeToType]: (a: any) => InputTypeToType[K]};
 const inputTypeToValueConverter: NameTypeToConverter = {
@@ -40,12 +40,32 @@ interface BooleanNTInputProps extends SharedInputProps<boolean> {
 function BooleanNTInput(props: BooleanNTInputProps) {
 	const {label, onChange, id: givenId, checked = false, type, ...nativeProps} = props;
 	const id = useArbitraryId();
-	const labelId = `${id}-label`
-	console.log("bool nt input", props);
+	const labelId = `${id}-label`;
+
+	const [localChecked, setLocalChecked] = useState(checked);
+
+	useEffect(() => {setLocalChecked(checked)}, [checked]); // set the localValue to value every time value is updated
+
+	useEffect(() => {
+		let id: number;
+		let clear = () => window.clearTimeout(id);
+		id = window.setTimeout(() => {
+			if(localChecked !== checked) onChange(localChecked); // only post change if we're different than expected
+			clear = () => {}; // don't bother clearing timeout if localValue updates after the timeout is called
+		}, 250); // wait ~.25s until updating NT value (save network traffic)
+
+		// wrap clear in another method here to capture the variable rather than the current variable's value
+		// if clear is updated by the timeout the updated reference wouldn't be picked up if we
+		// did `return clear;`
+		return () => {
+			clear();
+		}
+	}, [localChecked]);
+
 	return (
 		<div className={"nt-field " + type}>
 			<label htmlFor={id} id={labelId}>{label}</label>
-			<input id={id} onChange={e => onChange(e.target.checked)} type={type} checked={checked} {...nativeProps} />
+			<input id={id} onChange={e => setLocalChecked(e.target.checked)} type={type} checked={localChecked} {...nativeProps} />
 		</div>
 	)
 }
@@ -68,10 +88,30 @@ function NTInput(props: NTInputProps) {
 	const id = useArbitraryId(givenId);
 	const labelId = `${id}-label`;
 
+	const [localValue, setLocalValue] = useState(value);
+
+	useEffect(() => {setLocalValue(value)}, [value]); // set the localValue to value every time value is updated
+
+	useEffect(() => {
+		let id: number;
+		let clear = () => window.clearTimeout(id);
+		id = window.setTimeout(() => {
+			if(localValue !== value) onChange(localValue); // only post change if we're different than expected
+			clear = () => {}; // don't bother clearing timeout if localValue updates after the timeout is called
+		}, 250); // wait ~.25s until updating NT value (save network traffic)
+
+		// wrap clear in another method here to capture the variable rather than the current variable's value
+		// if clear is updated by the timeout the updated reference wouldn't be picked up if we
+		// did `return clear;`
+		return () => {
+			clear();
+		}
+	}, [localValue]);
+
 	return (
 		<div className={"nt-field " + type}>
 			<label htmlFor={id} id={labelId}>{label}</label>
-			<input id={id} type={type} onChange={e => onChange(e.target.value)} value={value} {...nativeProps} />
+			<input id={id} type={type} onChange={e => setLocalValue(e.target.value)} value={localValue} {...nativeProps} />
 		</div>
 	)
 }
@@ -165,8 +205,28 @@ export function NTArrayView<V extends Exclude<NTMessValue, any[]>>(props: NTArra
 		);
 	}
 
+	const addValue: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+		const newValue = key === "boolean" ? false : key === "double" ? 0 : "";
+		const updatedValue = value ? [...value, newValue] : [newValue];
+		setValue(updatedValue);
+		e.stopPropagation();
+	}
+
+	const removeValue: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+		setValue(value ? value.filter((_, i) => i !== value.length - 1) : []);
+		e.stopPropagation();
+	}
+
+	const label = (
+		<>
+			{props.targetNTKey} —&nbsp;
+			<button type="button" onClick={addValue}>+</button>
+			<button type="button" onClick={removeValue}>-</button>
+		</>
+	);
+
 	return (
-		<Accordion label={props.targetNTKey}>
+		<Accordion label={label}>
 			{children}
 		</Accordion>
 	)

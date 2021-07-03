@@ -42,7 +42,7 @@ public class ValueSocket {
         NetworkTableValue value = notification.value;
 
 
-        LOG.info("Received Entry update: {} {} {}", notification.name, notification.getEntry(), value.getValue());
+        LOG.info("Received Entry update: \"{}\" {}", notification.name, value.getValue());
 
         try {
             alertListeners(notification.getEntry().getName(), value);
