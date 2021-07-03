@@ -6,7 +6,6 @@
 	border-bottom: 1px solid rgba(120, 120, 120, .5);
 	padding: .5rem;
 	display: flex;
-	/* flex-flow: row wrap; */
 }
 
 .accordion > .button > .label {
@@ -25,8 +24,6 @@
 	transition-duration: 1s;
 	transition-property: height;
 	justify-items: baseline;
-	/* max-width: 100%;
-	width: 100%; */
 }
 
 .accordion > .button[aria-expanded=true] + .content {
@@ -38,22 +35,4 @@
 .accordion > .content > .nt-field {
 	flex: 1 1 calc(50% - 1rem);
 	align-self: flex-end;
-	/* width: calc(100% - 1rem); */
-	/* margin-left: .5rem;
-	margin-right: .5rem; */
 }
-
-/* .accordion > .content > .nt-field.checkbox,
-.accordion > .content > .nt-field.radio {
-	flex-basis: 0;
-	/* width: calc(100% - 1rem); */
-	/* margin-left: .5rem;
-	margin-right: .5rem; */
-} */
-
-/* @media screen and (min-width: 64em) {
-	.accordion > .content > .nt-field {
-		flex-basis: 0;
-		/* width: auto;
-	}
-} */
