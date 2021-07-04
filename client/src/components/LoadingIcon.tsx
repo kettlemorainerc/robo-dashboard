@@ -1,5 +1,5 @@
 import React from "react";
-import { useMemo } from "react";
+import {useMemo} from "react";
 
 export interface LoadingIconProps extends Omit<React.SVGProps<SVGSVGElement>, "viewBox"> {
 	

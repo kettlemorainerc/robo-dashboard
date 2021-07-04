@@ -1,5 +1,5 @@
 import React, {forwardRef, Ref, PropsWithChildren, useReducer, ReactNode} from "react";
-import { useArbitraryId } from "src/uuid";
+import {useArbitraryId} from "src/uuid";
 
 interface AccordionProps {
 	label: React.ReactChild

@@ -1,5 +1,5 @@
 import React, {forwardRef, InputHTMLAttributes, useCallback, useMemo, useRef} from "react";
-import {NTMessValue, useNetworkTableValue} from "./NetworkTableProvider";
+import {NetworkTableMessageValue, useNetworkTableValue} from "./NetworkTableProvider";
 import {Accordion} from "./Accordion";
 import {useArbitraryId} from "src/uuid";
 import {useState} from "react";
@@ -10,7 +10,7 @@ import {XYCoord} from "dnd-core";
 
 type InputTypeToType = {text: string, number: number, radio: boolean, checkbox: boolean};
 
-export type NTInputTypes = keyof InputTypeToType;
+export type NetworkTableInputTypes = keyof InputTypeToType;
 
 type NameTypeToConverter = {[K in keyof InputTypeToType]: (a: any) => InputTypeToType[K]};
 const inputTypeToValueConverter: NameTypeToConverter = {
@@ -25,7 +25,7 @@ const knownNetworkTableTypes = {
 }
 
 export interface NetworkTableComponentProps {
-	targetNTKey: string,
+	networkTableKey: string,
 	childTable?: string
 	ntTable?: string,
 }
@@ -34,7 +34,7 @@ export function NetworkTableList() {
 	
 }
 
-interface BooleanNTInputProps extends SharedInputProps<boolean> {
+interface BooleanNetworkTableInputProps extends SharedInputProps<boolean> {
 	checked?: boolean
 	label: React.ReactNode
 	// Technically RADIO should get a value, but we're not using form data... so it'd be redundant
@@ -42,12 +42,12 @@ interface BooleanNTInputProps extends SharedInputProps<boolean> {
 	name: string
 }
 
-const BooleanNTInput = forwardRef(function BooleanNTInput(props: BooleanNTInputProps, ref: React.Ref<HTMLDivElement>) {
+const BooleanNetworkTableInput = forwardRef(function BooleanNetworkTableInput(props: BooleanNetworkTableInputProps, ref: React.Ref<HTMLDivElement>) {
 	const {label, onChange, id: givenId, checked = false, type, ...nativeProps} = props;
 	const id = useArbitraryId();
 	const labelId = `${id}-label`;
 
-	const [localChecked, setLocalChecked] = useState(checked);
+	const [localChecked = false, setLocalChecked] = useState(checked);
 
 	useEffect(() => {setLocalChecked(checked)}, [checked]); // set the localValue to value every time value is updated
 
@@ -57,7 +57,7 @@ const BooleanNTInput = forwardRef(function BooleanNTInput(props: BooleanNTInputP
 		id = window.setTimeout(() => {
 			if(localChecked !== checked) onChange(localChecked); // only post change if we're different than expected
 			clear = () => {}; // don't bother clearing timeout if localValue updates after the timeout is called
-		}, 250); // wait ~.25s until updating NT value (save network traffic)
+		}, 250); // wait ~.25s until updating NetworkTable value (save network traffic)
 
 		// wrap clear in another method here to capture the variable rather than the current variable's value
 		// if clear is updated by the timeout the updated reference wouldn't be picked up if we
@@ -88,14 +88,14 @@ interface SharedInputProps<V> extends Pick<InputHTMLAttributes<HTMLInputElement>
 	
 }
 
-interface NTInputProps extends SharedInputProps<string> {
+interface NetworkTableInputProps extends SharedInputProps<string> {
 	value?: string
 	type: "text" | "number"
 }
 
-const NTInput = forwardRef(function NTInput(props: NTInputProps, ref: React.Ref<HTMLDivElement>) {
+const NetworkTableInput = forwardRef(function NetworkTableInput(props: NetworkTableInputProps, ref: React.Ref<HTMLDivElement>) {
 	// the value = "" is setting value to "" if and ONLY IF value is undefined
-	const {label, onChange, type, id: givenId, value = "", ...nativeProps} = props;
+	const {label, onChange, type, id: givenId, value, ...nativeProps} = props;
 	const id = useArbitraryId(givenId);
 	const labelId = `${id}-label`;
 
@@ -107,9 +107,9 @@ const NTInput = forwardRef(function NTInput(props: NTInputProps, ref: React.Ref<
 		let id: number;
 		let clear = () => window.clearTimeout(id);
 		id = window.setTimeout(() => {
-			if(localValue !== value) onChange(localValue); // only post change if we're different than expected
+			if(typeof localValue === "string" && localValue !== value) onChange(localValue); // only post change if we're different than expected
 			clear = () => {}; // don't bother clearing timeout if localValue updates after the timeout is called
-		}, 250); // wait ~.25s until updating NT value (save network traffic)
+		}, 250); // wait ~.25s until updating NetworkTable value (save network traffic)
 
 		// wrap clear in another method here to capture the variable rather than the current variable's value
 		// if clear is updated by the timeout the updated reference wouldn't be picked up if we
@@ -121,24 +121,24 @@ const NTInput = forwardRef(function NTInput(props: NTInputProps, ref: React.Ref<
 
 	const localLabel = value !== localValue ? (
 		<>
-			{label} <LoadingIcon width="1em" height="auto" style={{display:"inline-block"}} />
+			{label} <LoadingIcon width="1em" height={undefined} style={{display:"inline-block", height: "auto"}} />
 		</>
 	) : label;
 
 	return (
 		<div className={"nt-field " + type} ref={ref}>
 			<label htmlFor={id} id={labelId}>{localLabel}</label>
-			<input id={id} type={type} onChange={e => setLocalValue(e.target.value)} value={localValue} {...nativeProps} />
+			<input id={id} type={type} onChange={e => setLocalValue(e.target.value)} value={localValue ?? ""} {...nativeProps} />
 		</div>
 	)
 });
 
-function isBooleanArrayView(props: NTArrayViewProps<any>): props is NTArrayViewProps<boolean> {
+function isBooleanArrayView(props: NetworkTableArrayViewProps<any>): props is NetworkTableArrayViewProps<boolean> {
 	return props.childType === "checkbox" || props.childType === "radio";
 }
 
 // TODO: Figure out a way/form to define expected array sizes and a way to map an index to a label/displayName
-function BooleanArrayView(props: NTArrayViewProps<boolean> & {value: boolean[], onChange(checked: boolean[]): void}) {
+function BooleanArrayView(props: NetworkTableArrayViewProps<boolean> & {value: boolean[], onChange(checked: boolean[]): void}) {
 	const onChange = useCallback((idx: number, update: boolean) => {
 		let copy = [...props.value];
 		// console.log({copy});
@@ -158,13 +158,13 @@ function BooleanArrayView(props: NTArrayViewProps<boolean> & {value: boolean[], 
 	return (
 		<>
 			{props.value.map((checked, idx) => (
-				<BooleanNTInput
+				<BooleanNetworkTableInput
 					type={props.childType}
-					name={props.targetNTKey}
+					name={props.networkTableKey}
 					label={idx}
 					onChange={val => onChange(idx, val)}
 					checked={checked}
-					id={`${props.targetNTKey}-${idx}`}
+					id={`${props.networkTableKey}-${idx}`}
 					key={idx} // generally frowned upon, but it's fine since the Index is literally the ONLY identifier for this value on this side
 				/>
 			))}
@@ -172,7 +172,7 @@ function BooleanArrayView(props: NTArrayViewProps<boolean> & {value: boolean[], 
 	);
 }
 
-function ArrayView<V extends string | number>(props: NTArrayViewProps<V> & {value: V[], onChange(val: V[]): void}) {
+function ArrayView<V extends string | number>(props: NetworkTableArrayViewProps<V> & {value: V[], onChange(val: V[]): void}) {
 	const onChange = useCallback((idx: number, val: V) => {
 		const copy = [...props.value];
 
@@ -184,7 +184,7 @@ function ArrayView<V extends string | number>(props: NTArrayViewProps<V> & {valu
 	return (
 		<>
 			{props.value.map((val, idx) => (
-				<NTInput
+				<NetworkTableInput
 					label={idx === 0 ? "This is a long label" : idx}
 					type={props.childType as any}
 					value={val as any}
@@ -250,14 +250,14 @@ function useDraggable({move, index}: DraggableProps) {
 
 type KeysOfType<Type, Within> = {[K in keyof Within]: Within[K] extends Type ? K : never}[keyof Within]
 
-interface NTArrayViewProps<V extends Exclude<NTMessValue, Array<any>>> extends NetworkTableComponentProps, DraggableProps {
+interface NetworkTableArrayViewProps<V extends Exclude<NetworkTableMessageValue, Array<any>>> extends NetworkTableComponentProps, DraggableProps {
 	childType: KeysOfType<V, InputTypeToType> // radios should only ever be used with array types
 }
 
-export function NTArrayView<V extends Exclude<NTMessValue, any[]>>(props: NTArrayViewProps<V>) {
-	const {targetNTKey, childTable, ntTable, childType} = props;
+export function NetworkTableArrayView<V extends Exclude<NetworkTableMessageValue, any[]>>(props: NetworkTableArrayViewProps<V>) {
+	const {networkTableKey, childTable, ntTable, childType} = props;
 	const key = childType === "radio" || childType === "checkbox" ? "boolean" : childType === "text" ? "string" : "double";
-	const [value, setValue] = useNetworkTableValue<`${typeof key}[]`, any[]>(targetNTKey, `${key}[]`, childTable, ntTable);
+	const [value, setValue] = useNetworkTableValue<`${typeof key}[]`, any[]>(networkTableKey, `${key}[]`, childTable, ntTable);
 	const {ref} = useDraggable(props);
 
 	let children: React.ReactNode;
@@ -288,7 +288,7 @@ export function NTArrayView<V extends Exclude<NTMessValue, any[]>>(props: NTArra
 
 	const label = (
 		<>
-			{props.targetNTKey} —&nbsp;
+			{props.networkTableKey} —&nbsp;
 			<button type="button" onClick={addValue}>+</button>
 			<button type="button" onClick={removeValue}>-</button>
 		</>
@@ -302,20 +302,20 @@ export function NTArrayView<V extends Exclude<NTMessValue, any[]>>(props: NTArra
 	)
 }
 
-interface NTViewProps<V extends Exclude<NTMessValue, Array<any>>> extends NetworkTableComponentProps, DraggableProps {
+interface NetworkTableValueViewProps<V extends Exclude<NetworkTableMessageValue, Array<any>>> extends NetworkTableComponentProps, DraggableProps {
 	childType: Exclude<KeysOfType<V, InputTypeToType>, "radio">
 }
 
-export function NTView<V extends Exclude<NTMessValue, Array<any>>>(props: NTViewProps<V>) {
-	const {childType, targetNTKey, childTable, ntTable} = props;
+export function NetworkTableValueView<V extends Exclude<NetworkTableMessageValue, Array<any>>>(props: NetworkTableValueViewProps<V>) {
+	const {childType, networkTableKey, childTable, ntTable} = props;
 	const key = childType === "checkbox" ? "boolean" : childType === "text" ? "string" : "double";
-	const [value, setValue] = useNetworkTableValue<`${typeof key}`, V>(targetNTKey, key, childTable, ntTable);
+	const [value, setValue] = useNetworkTableValue<`${typeof key}`, V>(networkTableKey, key, childTable, ntTable);
 	const {ref} = useDraggable(props);
 
 	let children: React.ReactNode;
-	if(childType === "checkbox" || childType === "radio") {
-		return <BooleanNTInput ref={ref} label={targetNTKey} name={targetNTKey} type={childType} checked={value as any} onChange={setValue as any} />
+	if(childType === "checkbox") {
+		return <BooleanNetworkTableInput ref={ref} label={networkTableKey} name={networkTableKey} type={childType} checked={value as boolean} onChange={setValue as any} />
 	} else {
-		return <NTInput ref={ref} label={targetNTKey} onChange={setValue as any} value={value as any} type={childType as any} />
+		return <NetworkTableInput ref={ref} label={networkTableKey} onChange={setValue as any} value={value as any} type={childType as any} />
 	}
 }

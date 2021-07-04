@@ -1,13 +1,13 @@
-import React, { useCallback, useState } from "react";
-import {NTMessType, WebSockerProvider} from "./components/NetworkTableProvider";
-import { NTArrayView, NTInputTypes, NTView} from "./components/NetworkTableList";
-import { ConnectionListener } from "./components/ConnectionListener";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
+import React, {useCallback, useState} from "react";
+import {NetworkTableMessageType, WebSockerProvider} from "./components/NetworkTableProvider";
+import {NetworkTableArrayView, NetworkTableInputTypes, NetworkTableValueView} from "./components/NetworkTableList";
+import {ConnectionListener} from "./components/ConnectionListener";
+import {DndProvider} from "react-dnd";
+import {HTML5Backend} from "react-dnd-html5-backend";
 
 type ChildType = {key: string} & (
-	{type: Exclude<NTMessType, `${string}[]`>, childType: Exclude<NTInputTypes, "radio">} |
-	{type: Extract<NTMessType, `${string}[]`>, childType: NTInputTypes}
+	{type: Exclude<NetworkTableMessageType, `${string}[]`>, childType: Exclude<NetworkTableInputTypes, "radio">} |
+	{type: Extract<NetworkTableMessageType, `${string}[]`>, childType: NetworkTableInputTypes}
 )
 
 export function App() {
@@ -54,41 +54,41 @@ export function App() {
 						</span>
 					</div>
 					<div className="left">
-						<h3>Raw NT Values</h3>
+						<h3>Raw NetworkTable Values</h3>
 						<div className="nt-values">
 							{keys.map(({key, type, childType}, idx) => (
 								type.endsWith("[]") ? (
-									<NTArrayView key={key} index={idx} childType={childType} targetNTKey={key} move={move} />
+									<NetworkTableArrayView key={key} index={idx} childType={childType} networkTableKey={key} move={move} />
 								) : (
-									<NTView key={key} index={idx} childType={childType as any} targetNTKey={key} move={move} />
+									<NetworkTableValueView key={key} index={idx} childType={childType as any} networkTableKey={key} move={move} />
 								)
 							))}
-							{/* <NTView
-								targetNTKey="boolean"
+							{/* <NetworkTableValueView
+								networkTableKey="boolean"
 								childType="checkbox"
 							/>
-							<NTView
-								targetNTKey="string"
+							<NetworkTableValueView
+								networkTableKey="string"
 								childType="text"
 							/>
-							<NTView
-								targetNTKey="double"
+							<NetworkTableValueView
+								networkTableKey="double"
 								childType="number"
 							/>
-							<NTView
-								targetNTKey="This is a long key"
+							<NetworkTableValueView
+								networkTableKey="This is a long key"
 								childType="number"
 							/>
-							<NTArrayView
-								targetNTKey="Selected Autonomous"
+							<NetworkTableArrayView
+								networkTableKey="Selected Autonomous"
 								childType="radio"
 							/>
-							<NTArrayView
-								targetNTKey="Random Strings"
+							<NetworkTableArrayView
+								networkTableKey="Random Strings"
 								childType="text"
 							/>
-							<NTArrayView
-								targetNTKey="Doubles"
+							<NetworkTableArrayView
+								networkTableKey="Doubles"
 								childType="number"
 							/> */}
 						</div>

@@ -89,7 +89,7 @@ public final class NetworkUtilities {
     }
 
     public static double getDouble(String key) {
-        return getEntry(key).getDouble(Double.NaN);
+        return getEntry(key).getDouble(0);
     }
 
     public static void togglePersist(String key) {
