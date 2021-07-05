@@ -63,34 +63,6 @@ export function App() {
 									<NetworkTableValueView key={key} index={idx} childType={childType as any} networkTableKey={key} move={move} />
 								)
 							))}
-							{/* <NetworkTableValueView
-								networkTableKey="boolean"
-								childType="checkbox"
-							/>
-							<NetworkTableValueView
-								networkTableKey="string"
-								childType="text"
-							/>
-							<NetworkTableValueView
-								networkTableKey="double"
-								childType="number"
-							/>
-							<NetworkTableValueView
-								networkTableKey="This is a long key"
-								childType="number"
-							/>
-							<NetworkTableArrayView
-								networkTableKey="Selected Autonomous"
-								childType="radio"
-							/>
-							<NetworkTableArrayView
-								networkTableKey="Random Strings"
-								childType="text"
-							/>
-							<NetworkTableArrayView
-								networkTableKey="Doubles"
-								childType="number"
-							/> */}
 						</div>
 					</div>
 				</div>

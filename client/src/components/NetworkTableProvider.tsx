@@ -111,11 +111,11 @@ export function WebSockerProvider({children}) {
 	}, [targetRemote, connection, listeners]);
 
 	useEffect(() => {
-		const to = window.setTimeout(() => {
+		const to = window.setInterval(() => {
 			if(connectionStatus.current === "Not Connected") connectToTarget();
 		}, 500);
 
-		return () => window.clearTimeout(to);
+		return () => window.clearInterval(to);
 	}, []);
 
 	const ctx = useMemo<WebsocketTable<any, any>>(() => ({
