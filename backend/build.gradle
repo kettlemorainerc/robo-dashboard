@@ -74,6 +74,7 @@ tasks.withType(JavaExec) {
     args << "-Djava.library.path=${System.getProperty("java.library.path")}${File.pathSeparator}${extractDir}"
 }
 
+tasks.quarkusDev.dependsOn tasks.extractTestJNI, tasks.extractNatives
 quarkusDev {
     jvmArgs = ["-Djava.library.path=${System.getProperty("java.library.path")}${File.pathSeparator}${extractDir}"]
 }

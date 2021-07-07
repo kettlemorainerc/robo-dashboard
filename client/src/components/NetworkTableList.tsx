@@ -1,6 +1,6 @@
 import React, {forwardRef, InputHTMLAttributes, useCallback, useMemo, useRef} from "react";
 import {NetworkTableMessageValue, useNetworkTableValue} from "./NetworkTableProvider";
-import {Accordion} from "./Accordion";
+import {Accordion} from "../layout/Accordion";
 import {useArbitraryId} from "src/uuid";
 import {useState} from "react";
 import {useEffect} from "react";
@@ -266,11 +266,11 @@ export function NetworkTableArrayView<V extends Exclude<NetworkTableMessageValue
 		children = null;
 	} else if(isBooleanArrayView(props)) {
 		children = (
-			<BooleanArrayView {...props} onChange={setValue as any} value={value as any} />
+			<BooleanArrayView {...props} onChange={setValue} value={value} />
 		);
 	} else {
 		children = (
-			<ArrayView {...props as any} onChange={setValue as any} value={value as any} />
+			<ArrayView {...props} onChange={setValue} value={value} />
 		);
 	}
 

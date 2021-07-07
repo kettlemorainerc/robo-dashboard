@@ -4,6 +4,7 @@ import {NetworkTableArrayView, NetworkTableInputTypes, NetworkTableValueView} fr
 import {ConnectionListener} from "./components/ConnectionListener";
 import {DndProvider} from "react-dnd";
 import {HTML5Backend} from "react-dnd-html5-backend";
+import {Modal} from "./layout/Modal";
 
 type ChildType = {key: string} & (
 	{type: Exclude<NetworkTableMessageType, `${string}[]`>, childType: Exclude<NetworkTableInputTypes, "radio">} |
@@ -38,12 +39,17 @@ export function App() {
 		});
 	}, [setKeys]);
 
+
+	const [theme, setTheme] = useState("light");
+	const [show, setShow] = useState(true);
+
 	return (
 		<DndProvider backend={HTML5Backend}>
 			<WebSockerProvider>
-				<div id="wrapper">
+				<div id="wrapper" className={theme}>
 					<div className="body">
 						<h1>I am the body</h1>
+				<Modal show={show} onClose={() => setShow(false)} title="Title" />
 					</div>
 					<div className="head">
 						<ConnectionListener />

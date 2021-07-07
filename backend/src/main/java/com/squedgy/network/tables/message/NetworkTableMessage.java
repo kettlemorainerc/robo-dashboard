@@ -41,7 +41,6 @@ public abstract class NetworkTableMessage<Value> extends Message {
     @Override
     public void onGet(Session session) throws IOException {
         NetworkTableMessage<Value> giveBack = withValue(get.apply(key));
-        LOG.info("Returning: {}", giveBack.value);
         session.getAsyncRemote().sendObject(mapper.writeValueAsString(giveBack));
     }
 

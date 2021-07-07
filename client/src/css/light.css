@@ -1,0 +1,10 @@
+#wrapper.light {
+    --default-color: black;
+    --default-background: white;
+
+    --highlight-background: #052376;
+    --highlight-color: white;
+
+    color: var(--default-color);
+    background-color: var(--default-background);
+}

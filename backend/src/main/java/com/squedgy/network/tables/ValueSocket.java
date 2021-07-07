@@ -46,9 +46,6 @@ public class ValueSocket {
     private static void onEntryUpdate(EntryNotification notification) {
         NetworkTableValue value = notification.value;
 
-
-        LOG.info("Received Entry update: \"{}\" {}", notification.name, value.getValue());
-
         try {
             alertListeners(notification.getEntry().getName(), value);
         } catch(JsonProcessingException e) {
@@ -65,6 +62,7 @@ public class ValueSocket {
 
     void onShutdown(@Observes ShutdownEvent ignored) {
         LOG.info("Shutting down");
+        NetworkUtilities.shutdown();
         handlerId.ifPresent(NetworkUtilities::removeListener);
     }
 
@@ -72,7 +70,6 @@ public class ValueSocket {
         Message toSend = messageFor(key, value);
         if(toSend == null) return;
         String sending = mapper.writeValueAsString(toSend);
-        LOG.info("Sending message: {}", toSend);
         for(Session sess : sessions) sess.getAsyncRemote().sendObject(sending);
     }
 
@@ -97,7 +94,7 @@ public class ValueSocket {
     @OnMessage
     public void message(String message, Session session) throws IOException {
         Message actual = mapper.readValue(message, Message.class);
-        LOG.info("Received Message: {}", actual);
+
         Type messageType = actual.getMessageType();
 
         if(messageType == Type.GET) actual.onGet(session);

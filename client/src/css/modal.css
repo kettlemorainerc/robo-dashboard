@@ -1,0 +1,61 @@
+.modal {
+    --header-background: var(--highlight-background);
+    --header-color: var(--highlight-color);
+    --background: var(--default-background);
+    --color: var(--default-color);
+
+    display: none;
+    position: absolute;
+    background-color: rgba(0, 0, 0, .2);
+    height: 100vh;
+    width: 100vw;
+    top: 0;
+    left: 0;
+}
+
+.modal.show {
+    display: block;
+}
+
+.modal > .body {
+    position: relative;
+    top: 50%;
+    left: 50%;
+
+    border-radius: .5rem;
+    background-color: var(--background);
+
+    max-width: 80vw;
+    max-height: 70vh;
+    min-height: 30vh;
+
+    transform: translate(-50%, -50%);
+}
+
+.modal > .body > .header {
+    display: flex;
+    align-items: center;
+    
+    min-height: 24px;
+    padding: .5rem 1rem;
+    font-size: 1.2rem;
+    background-color: var(--header-background);
+    color: var(--header-color);
+}
+
+.modal > .body > .header > .fill {
+    flex: 1 1 100%
+}
+
+.modal > .body > .header > .close-button {
+    border-width: 0;
+    cursor: pointer;
+    background: inherit;
+    justify-self: end;
+    align-self: baseline;
+    padding: 0;
+}
+
+ .modal > .body > .content {
+    padding: .5rem 1rem;
+ }

@@ -17,7 +17,12 @@ public final class NetworkUtilities {
     private static final NetworkTableInstance NETWORK_TABLE = NetworkTableInstance.getDefault();
 
     public static void initializeNT() {
-        setNetworkTableParams(false);
+        setNetworkTableParams(true);
+    }
+
+    public static void shutdown() {
+        NETWORK_TABLE.stopServer();
+        NETWORK_TABLE.stopClient();
     }
 
     public static void setNetworkTableParams(boolean asClient) {
