@@ -5,8 +5,9 @@ import {useArbitraryId} from "src/uuid";
 import {useState} from "react";
 import {useEffect} from "react";
 import {LoadingIcon} from "./LoadingIcon";
-import {useDrag, useDrop, DropTargetMonitor} from "react-dnd";
-import {XYCoord} from "dnd-core";
+import {useDrag, useDrop} from "react-dnd";
+import { Modal } from "src/layout/Modal";
+import { ViewDefinition } from "./NetworkTableViewForm";
 
 type InputTypeToType = {text: string, number: number, radio: boolean, checkbox: boolean};
 
@@ -30,8 +31,72 @@ export interface NetworkTableComponentProps {
 	ntTable?: string,
 }
 
+type ToggleTrue = () => void;
+type ToggleFalse = () => void;
+export function useFlag(def = false): [boolean, React.Dispatch<React.SetStateAction<boolean>>, ToggleTrue, ToggleFalse] {
+	const [bool, setBool] = useState(def);
+
+	const setTrue = useCallback(() => setBool(true), []);
+	const setFalse = useCallback(() => setBool(false), []);
+
+	return [bool, setBool, setTrue, setFalse];
+}
+
 export function NetworkTableList() {
-	
+	const [createView, setCreateView, showCreateView, hideCreateView] = useFlag();
+	const [views, setViews] = useState<ViewDefinition[]>([
+		{key: "boolean", type: "boolean", childType: "checkbox"},
+		{key: "string", type: "string", childType: "text"},
+		{key: "double", type: "double", childType: "number"},
+		{key: "This is a long key", type: "double", childType: "number"},
+		{key: "Selected Autonomous", type: "double[]", childType: "radio"},
+		{key: "Random Strings", type: "string[]", childType: "text"},
+		{key: "Doubles", type: "double[]", childType: "number"},
+	]);
+
+	const move = useCallback((from: number, to: number) => {
+		setViews(keys => {
+			const early = from > to ? to : from; // get the smaller index
+			const late = early === from ? to : from; // larger index
+
+			const a = keys[early];
+			const b = keys[late];
+
+			const before = keys.slice(0, early);
+			const between = keys.slice(early + 1, late);
+			const after = keys.slice(late + 1);
+
+			return [...before, b, ...between, a, ...after];
+		});
+	}, [setViews]);
+
+	const addNewView = useCallback((view: ViewDefinition) => {
+		setViews(keys => ([...keys, view]));
+	}, []);
+
+	const removeView = useCallback((idx: number) => {
+		setViews(keys => keys.filter((_, i) => i !== idx));
+	}, []);
+
+	return (
+		<>
+			<h3>Raw NetworkTable Values</h3>
+			<Modal title="Add Listener" show={createView} onClose={hideCreateView}>
+
+			</Modal>
+			<div className="nt-values">
+				{(
+					views.map(({key, childType, type}, idx) => (
+						type.endsWith("[]") ? (
+							<NetworkTableArrayView key={key} index={idx} childType={childType} networkTableKey={key} move={move} />
+						) : (
+							<NetworkTableValueView key={key} index={idx} childType={childType as any} networkTableKey={key} move={move} />
+						)
+					))
+				)}
+			</div>
+		</>
+	)
 }
 
 interface BooleanNetworkTableInputProps extends SharedInputProps<boolean> {
