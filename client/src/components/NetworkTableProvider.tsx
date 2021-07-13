@@ -1,4 +1,5 @@
 import React, {createContext, useContext, useEffect, PropsWithChildren, useState, useCallback, useRef, useMemo, useReducer} from "react";
+import { defaultNetworkTable } from "./NetworkTableViewForm";
 // import WebSocket from "ws";
 
 type WebsocketNetworkTableListener<T> = (data: T) => void;
@@ -179,7 +180,7 @@ export function useNetworkTableValue<Type extends NetworkTableMessageType, Value
 	key: string,
 	type: Type,
 	childNetworkTable: string = "",
-	baseNetworkTable = "SmartDashboard"
+	baseNetworkTable = defaultNetworkTable
 ): [Value | undefined, (val: Value) => void] {
 	type Target = Value | undefined; // Just a local type reference
 

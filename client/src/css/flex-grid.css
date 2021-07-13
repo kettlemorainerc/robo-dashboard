@@ -1,0 +1,19 @@
+.flex {
+	display: flex;
+}
+
+.flex-cell {
+	margin: .25rem .5rem;
+}
+
+.flex-cell.auto {
+	flex: 1 1 auto;
+}
+
+.flex-cell.shrink {
+	flex: 0 0 auto;
+}
+
+.flex-cell.full {
+	flex: 0 0 100%;
+}

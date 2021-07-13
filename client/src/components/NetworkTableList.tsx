@@ -68,6 +68,7 @@ export function NetworkTableList() {
 
 	const addNewView = useCallback((view: ViewDefinition) => {
 		setViews(keys => ([...keys, view]));
+		hideCreateView()
 	}, []);
 
 	const removeView = useCallback((idx: number) => {
@@ -76,7 +77,7 @@ export function NetworkTableList() {
 
 	return (
 		<>
-			<h3>
+			<h3 style={{display: "flex", justifyContent: "space-between", padding: ".25rem .5rem"}}>
 				Raw NetworkTable Values 
 				<button type="button" onClick={showCreateView}>+</button>
 			</h3>

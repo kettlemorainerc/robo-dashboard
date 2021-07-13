@@ -1,9 +1,24 @@
 .radio-group-div {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+}
 
+.radio-group-div > label {
+	padding-right: .25rem;
+}
+
+.radio-group-div > label::after {
+	content: " :";
 }
 
 .radio-group-div > .radios {
-    
+    display: flex;
+	flex-wrap: wrap;
+}
+
+.radio-group-div > .radios > .radio {
+	padding: .25rem .25rem;
 }
 
 .boolean-input-wrapper {
@@ -16,6 +31,22 @@
 
 .boolean-input-wrapper > .input {
     flex: 0 0 auto;
+}
+
+.input-wrapper {
+	display: flex;
+}
+
+.input-wrapper > label {
+	flex: 0 0 auto;
+	margin: .25rem .5rem;
+}
+
+.input-wrapper > input {
+	flex: 1 1 100%;
+	margin: .25rem .5rem;
+	padding-left: .5rem;
+	border: 2px solid var(--border, var(--color, currentcolor));
 }
 
 

@@ -1,6 +1,6 @@
 import React, { ReactChild, useCallback } from "react";
 
-interface RadioGroupProps<Value extends string | number> {
+export interface RadioGroupProps<Value extends string | number> {
     value: Value
     options: Set<Value>
     onChange(value: Value): void
