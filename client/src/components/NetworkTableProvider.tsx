@@ -58,6 +58,8 @@ export function WebSockerProvider({children}) {
 	}, []);
 
 	const [knownKeys, updateKnownKeys] = useReducer(reducer, undefined, () => ({} as any));
+	const knownKeysRef = useRef(knownKeys);
+	knownKeysRef.current = knownKeys;
 	const [listenerKeys, updateListenerKeys] = useReducer(reducer, undefined, () => ({} as any));
 
 	const updateConnectionStatus = useCallback((status: ConnectionState) => {
@@ -119,7 +121,7 @@ export function WebSockerProvider({children}) {
 		ws.addEventListener("message", (event) => {
 			const value: NetworkTableMessage<any, any> = JSON.parse(event.data);
 			if(/^(boolean|double|string)(\[])?$/.test(value.type)) {
-				if(!knownKeys[value.type]?.includes(value.key)) {
+				if(!knownKeysRef.current[value.type]?.includes(value.key)) {
 					updateKnownKeys(value);
 				}
 				if(listeners[value.key]) listeners[value.key].forEach(list => list(value.value));
@@ -202,10 +204,9 @@ export function useNetworkTableValue<Type extends NetworkTableMessageType, Value
 
 	const networkTableListener = useCallback<WebsocketNetworkTableListener<Value>>((value) => {
 		setValue(old => {
-			if(
-				(Array.isArray(old) && [...old].every((v, idx) => v === value[idx])) ||
-				old ===value
-			) return old;
+			const sameValue = old === value;
+			const sameArray = Array.isArray(old) && Array.isArray(value) && old.length === value.length && [...old].every((v, i) => v === value[i])
+			if(sameValue || sameArray) return old;
 
 			return value;
 		})

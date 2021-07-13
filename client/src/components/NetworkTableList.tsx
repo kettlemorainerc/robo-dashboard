@@ -8,6 +8,7 @@ import {LoadingIcon} from "./LoadingIcon";
 import {useDrag, useDrop} from "react-dnd";
 import { Modal } from "src/layout/Modal";
 import { NetworkTableViewForm, ViewDefinition } from "./NetworkTableViewForm";
+import {FlexCell, FlexGrid} from "../layout/FlexGrid";
 
 type InputTypeToType = {text: string, number: number, radio: boolean, checkbox: boolean};
 
@@ -352,11 +353,15 @@ export function NetworkTableArrayView<V extends Exclude<NetworkTableMessageValue
 	}
 
 	const label = (
-		<>
-			{props.networkTableKey} —&nbsp;
-			<button type="button" onClick={addValue}>+</button>
-			<button type="button" onClick={removeValue}>-</button>
-		</>
+		<FlexGrid>
+			<FlexCell>
+				{props.networkTableKey}
+			</FlexCell>
+			<FlexCell shrink>
+				<button type="button" onClick={addValue}>+</button>
+				<button type="button" onClick={removeValue}>-</button>
+			</FlexCell>
+		</FlexGrid>
 	);
 
 
