@@ -1,0 +1,127 @@
+.radio-group-div {
+
+}
+
+.radio-group-div > .radios {
+    
+}
+
+.boolean-input-wrapper {
+    display: flex;
+}
+
+.boolean-input-wrapper > .label {
+    flex: 1 1 100%;
+}
+
+.boolean-input-wrapper > .input {
+    flex: 0 0 auto;
+}
+
+
+.autocomplete-container {
+    width: auto;
+    background: inherit;
+    color: inherit;
+    position: relative;
+    display: inline-block;
+    --line-height: 1.15em;
+    --arrow-color: white;
+    --background: inherit;
+    --color: currentcolor;
+    --stroke: var(--color);
+    --split-color: white;
+    --modal-background: rgba(0, 0, 0, .2);
+}
+
+.autocomplete-container > canvas {
+    display: none;
+}
+
+.autocomplete-container > .value {
+    display: inline-flex;
+    border-radius: .25em;
+    padding: .25em 0 .25em .5em;
+    align-items: center;
+    border: var(--border, 1px solid var(--border-color, var(--color)))
+}
+
+.autocomplete-container > .value > * {
+    flex: 1 1 auto;
+    display: inline-block;
+	box-sizing: border-box;
+	padding: unset;
+	border: unset;
+	margin: unset;
+	color: inherit;
+	font: inherit;
+}
+
+.autocomplete-container > .value > input:focus,
+.autocomplete-container > .value > input:focus-visible {
+    border: none;
+    outline: none;
+}
+
+
+
+.autocomplete-container > .value > input[type="search"] {
+	box-sizing: content-box;
+	-webkit-appearance: textfield;
+}
+.autocomplete-container > .value > input[type="search"]::-webkit-search-decoration,
+.autocomplete-container > .value > input[type="search"]::-webkit-search-cancel-button {
+	-webkit-appearance: none;
+}
+.autocomplete-container > .value > input[type="number"]::-webkit-inner-spin-button,
+.autocomplete-container > .value > input[type="number"]::-webkit-outer-spin-button {
+	height: auto;
+}
+
+.autocomplete-container > .value > input::-moz-focus-inner {
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+.autocomplete-container > .value > .split {
+    width: 1px;
+    height: var(--line-height);
+    border-left: 1px solid var(--split-color);
+}
+
+.autocomplete-container > .value > .input {
+    border: none;
+    color: var(--color);
+    background: var(--background);
+}
+
+.autocomplete-container .arrow {
+    height: var(--line-height);
+    width: auto;
+    background: var(--arrow-background, var(--background));
+}
+
+.autocomplete-container .arrow path {
+    stroke: var(--stroke);
+    stroke-width: 10;
+    fill: transparent;
+}
+
+
+.autocomplete-container > .options-container {
+    display: none;
+}
+
+.autocomplete-container:focus-within > .options-container {
+    display: block;
+    position: absolute;
+    top: 100%;
+    padding: .25em;
+}
+
+.autocomplete-container > .options-container > .options {
+    border-radius: .25em;
+    background: var(--modal-background);
+    color: var(--color);
+}

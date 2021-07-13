@@ -44,7 +44,11 @@
 }
 
 .modal > .body > .header > .fill {
-    flex: 1 1 100%
+    flex: 1 1 auto;
+}
+
+.modal > .body > .header > .title {
+    flex: 0 0 auto;
 }
 
 .modal > .body > .header > .close-button {

@@ -3,7 +3,7 @@
 		"target": "ES2015",
 		"module": "AMD",
 		"moduleResolution": "Node",
-		"jsx": "react",
+		"jsx": "react-jsx",
 		"baseUrl": "./",
 		"rootDir": "./src",
 		"noEmit": true,
@@ -12,7 +12,7 @@
 		"esModuleInterop": true,
 		"resolveJsonModule": false,
 		"allowJs": true,
-		"lib": ["DOM", "DOM.Iterable", "ES2015", "ES2016", "ES2017"],
+		"lib": ["DOM", "DOM.Iterable", "ES2015", "ES2016", "ES2017", "ES2019.Object"],
 		"noImplicitAny": false,
 		"isolatedModules": true
 	},

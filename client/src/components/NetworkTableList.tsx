@@ -7,7 +7,7 @@ import {useEffect} from "react";
 import {LoadingIcon} from "./LoadingIcon";
 import {useDrag, useDrop} from "react-dnd";
 import { Modal } from "src/layout/Modal";
-import { ViewDefinition } from "./NetworkTableViewForm";
+import { NetworkTableViewForm, ViewDefinition } from "./NetworkTableViewForm";
 
 type InputTypeToType = {text: string, number: number, radio: boolean, checkbox: boolean};
 
@@ -20,10 +20,6 @@ const inputTypeToValueConverter: NameTypeToConverter = {
 	checkbox: a => typeof a === "boolean" ? a : Boolean(a),
 	radio: a => typeof a === "boolean" ? a : Boolean(a),
 };
-
-const knownNetworkTableTypes = {
-
-}
 
 export interface NetworkTableComponentProps {
 	networkTableKey: string,
@@ -80,9 +76,12 @@ export function NetworkTableList() {
 
 	return (
 		<>
-			<h3>Raw NetworkTable Values</h3>
+			<h3>
+				Raw NetworkTable Values 
+				<button type="button" onClick={showCreateView}>+</button>
+			</h3>
 			<Modal title="Add Listener" show={createView} onClose={hideCreateView}>
-
+				<NetworkTableViewForm addView={addNewView} />
 			</Modal>
 			<div className="nt-values">
 				{(

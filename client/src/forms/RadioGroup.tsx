@@ -50,7 +50,7 @@ function RadioButton<Value extends string | number>(props: RadioProps<Value>) {
     }, [onChange]);
 
     return (
-        <div className="radio">
+        <div className="boolean-input-wrapper radio">
             <label htmlFor={id}>{label}</label>
             <input
                 type="radio"

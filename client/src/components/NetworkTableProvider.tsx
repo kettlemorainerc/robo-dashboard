@@ -7,13 +7,16 @@ export interface WebsocketTable<Type extends NetworkTableMessageType, Value exte
 	targetRemote: string
 	setTargetRemote(target: string): void
 
-	addListener(key: string, listener: WebsocketNetworkTableListener<Value>): void
-	removeListener(key: string, listener: WebsocketNetworkTableListener<Value>): void
+	addListener(key: string, type: Type, listener: WebsocketNetworkTableListener<Value>): void
+	removeListener(key: string, type: Type, listener: WebsocketNetworkTableListener<Value>): void
 
-	getValue(message: NetworkTableMessage<Type, Value>): Promise<NetworkTableMessage<Type, Value> | undefined>
+	getValue(message: NetworkTableMessage<Type, Value>): Promise<void>
 	putValue(message: NetworkTableMessage<Type, Value>): void
 
 	connectToTarget(): void
+
+	listenerKeys: Record<NetworkTableMessageType, undefined | string[]>
+	knownKeys: Record<NetworkTableMessageType, undefined | string[]>
 }
 
 interface MessageBase {
@@ -34,6 +37,8 @@ const WebSocketCtx = createContext<WebsocketTable<any, any>>({
 	getValue: () => undefined as any,
 	putValue() {},
 	connectToTarget() {},
+	knownKeys: {} as any,
+	listenerKeys: {} as any,
 });
 
 export type ConnectionState = "Connected" | "Connecting" | "Not Connected"
@@ -42,6 +47,17 @@ export function WebSockerProvider({children}) {
 	const connection = useRef<WebSocket>();
 	const connectionStatus = useRef<ConnectionState>("Not Connected");
 	const [, forceUpdate] = useReducer(i => i ^ 0b1, 0);
+
+	type ListenerKeyUpdate = Pick<NetworkTableMessage<any, any>, "key" | "type">
+	const reducer = useCallback((keys: Record<NetworkTableMessageType, string[] | undefined>, update: ListenerKeyUpdate) => {
+		const type: NetworkTableMessageType = update.type;
+		const {[type]: keyValues = []} = keys;
+		if(keyValues.includes(update.key)) return keys;
+		return {...keys, [update.type]: [...keyValues, update.key]}
+	}, []);
+
+	const [knownKeys, updateKnownKeys] = useReducer(reducer, undefined, () => ({} as any));
+	const [listenerKeys, updateListenerKeys] = useReducer(reducer, undefined, () => ({} as any));
 
 	const updateConnectionStatus = useCallback((status: ConnectionState) => {
 		if(status !== connectionStatus.current) {
@@ -52,8 +68,11 @@ export function WebSockerProvider({children}) {
 
 	const {current: listeners} = useRef<Record<string, ((data) => void)[]>>({});
 
-	const addListener = useCallback<WebsocketTable<any, any>["addListener"]>((key, listener) => {
-		if(!listeners[key]) listeners[key] = [];
+	const addListener = useCallback<WebsocketTable<any, any>["addListener"]>((key, type, listener) => {
+		if(!listeners[key]) {
+			listeners[key] = [];
+			updateListenerKeys({key, type})
+		}
 		listeners[key].push(listener);
 	}, []);
 
@@ -61,7 +80,6 @@ export function WebSockerProvider({children}) {
 		if(listeners[key]) listeners[key] = listeners[key].filter(list => list !== listener);
 	}, []);
 
-	console.log({connectionStatus: connectionStatus.current});
 	const [targetRemote, setTargetRemote] = useState("localhost:8080");
 
 	const getValue = useCallback<WebsocketTable<any, any>["getValue"]>(
@@ -70,18 +88,13 @@ export function WebSockerProvider({children}) {
 				let resolved = false;
 				setTimeout(() => {
 					resolved = true;
-					resolve(undefined)
+					resolve(undefined);
 				}, 2000);
 
-				const listener = mess => {
-					removeListener(message.key, listener);
-					if(!resolved) resolve(mess);
-				}
-				addListener(message.key, listener);
 				const newTimeout = () => setTimeout(() => {
 					console.log("TO")
 					if(resolved) return;
-					if(!connection.current) newTimeout()
+					if(!connection.current || connection.current.readyState === WebSocket.CONNECTING) newTimeout()
 					else if(connection.current.readyState === WebSocket.OPEN) connection.current.send(JSON.stringify(message));
 				}, 100);
 				newTimeout();
@@ -103,10 +116,15 @@ export function WebSockerProvider({children}) {
 		ws.addEventListener("open", (event) => {updateConnectionStatus("Connected")});
 		ws.addEventListener("close", (close) => {updateConnectionStatus("Not Connected");});
 		ws.addEventListener("message", (event) => {
-			const value = JSON.parse(event.data);
+			const value: NetworkTableMessage<any, any> = JSON.parse(event.data);
+			if(/^(boolean|double|string)(\[])?$/.test(value.type)) {
+				if(!knownKeys[value.type]?.includes(value.key)) {
+					updateKnownKeys(value);
+				}
+				if(listeners[value.key]) listeners[value.key].forEach(list => list(value.value));
+			}
+			
 			console.log("message", value);
-			if(listeners[value.key]) listeners[value.key].forEach(list => list(value.value));
-
 		});
 	}, [targetRemote, connection, listeners]);
 
@@ -126,8 +144,11 @@ export function WebSockerProvider({children}) {
 		removeListener,
 		getValue,
 		putValue,
-		connectToTarget
-	}), [connectionStatus.current, targetRemote, setTargetRemote, addListener, removeListener, getValue, putValue, connectToTarget]);
+		connectToTarget,
+		knownKeys,
+		listenerKeys
+	}), [connectionStatus.current, targetRemote, setTargetRemote, addListener, removeListener, getValue,
+		 putValue, connectToTarget, knownKeys, listenerKeys]);
 
 	return (
 		<WebSocketCtx.Provider value={ctx}>
@@ -149,6 +170,7 @@ export function useNetworkTable<Type extends NetworkTableMessageType, Value exte
  * that you're using the default SmartDashboard network table, or a "child" table within the SmartDashboard network table.
  * 
  * @param key the key we want to target inside network tables/SmartDashboard
+ * @param type the type of value you are expecting to receive
  * @param childNetworkTable If get a child table within smart dashboard, pass the name here
  * @param baseNetworkTable If you're NOT using smart dashboard's built-in NetworkTable override this with your Network Table name
  * @returns A tuple that contains 2 items, the first is the current value of the network table, the second is method that updates the network table value
@@ -178,16 +200,21 @@ export function useNetworkTableValue<Type extends NetworkTableMessageType, Value
 	}, [nt, actualKey]);
 
 	const networkTableListener = useCallback<WebsocketNetworkTableListener<Value>>((value) => {
-		setValue(value as Value);
+		setValue(old => {
+			if(
+				(Array.isArray(old) && [...old].every((v, idx) => v === value[idx])) ||
+				old ===value
+			) return old;
+
+			return value;
+		})
 	}, [actualKey]);
 
 	useEffect(() => {
-		nt.getValue({key: actualKey, messageType: "GET", type, value: value!}).then(val => {
-			if(val !== undefined && val !== null) setValue(val.value);
-		});
-		nt.addListener(actualKey, networkTableListener);
-		return () => {nt.removeListener(actualKey, networkTableListener);}
-	}, [actualKey, networkTableListener, nt]);
+		nt.addListener(actualKey, type, networkTableListener);
+		nt.getValue({key: actualKey, messageType: "GET", type, value: value!});
+		return () => {nt.removeListener(actualKey, type, networkTableListener);}
+	}, [actualKey, networkTableListener, type, nt]);
 
 	return [value, updateValue];
 }

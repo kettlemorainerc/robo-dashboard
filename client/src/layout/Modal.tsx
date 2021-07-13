@@ -22,7 +22,9 @@ export function Modal(props: React.PropsWithChildren<ModalProps>) {
       <div className={`modal ${show ? "show" : ""}`} style={realStyle}>
           <div className="body">
                 <div className="header">
-                    {title}
+                    <div className="title">
+                        {title}
+                    </div>
                     <div className="fill" />
                     <button type="button" className="close-button" onClick={onClose}>
                         <svg width="1em" height="1em" viewBox="0 0 10 10" strokeWidth={2} style={{backgroundColor: "transparent", stroke: "white"}}>
