@@ -6,21 +6,22 @@ interface FlexItemProps {
 	wrap?: CSSProperties["flexWrap"]
 }
 
-interface FlexGrid extends FlexItemProps {
-
+export interface FlexGrid extends FlexItemProps {
+	id?: string
+	className?: string
 }
 
 export function FlexGrid(props: PropsWithChildren<FlexGrid>) {
-	const {children, align, justify = "center", wrap = "wrap"} = props;
+	const {children, align, justify = "center", wrap = "wrap", id, className = ""} = props;
 
 	return (
-		<div className="flex" style={{alignItems: align, justifyItems: justify, flexWrap: wrap}}>
+		<div className={`flex ${className}`} style={{alignItems: align, justifyItems: justify, flexWrap: wrap}} id={id}>
 			{children}
 		</div>
 	)
 }
 
-interface FlexCell extends Omit<FlexItemProps, "wrap"> {
+export interface FlexCell extends Omit<FlexItemProps, "wrap"> {
 	size?: "shrink" | "full" | "auto"
 	shrink?: boolean
 	full?: boolean

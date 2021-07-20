@@ -10,7 +10,7 @@ import { Modal } from "src/layout/Modal";
 import { NetworkTableViewForm, ViewDefinition } from "./NetworkTableViewForm";
 import {FlexCell, FlexGrid} from "../layout/FlexGrid";
 
-type InputTypeToType = {text: string, number: number, radio: boolean, checkbox: boolean};
+export type InputTypeToType = {text: string, number: number, radio: boolean, checkbox: boolean};
 
 export type NetworkTableInputTypes = keyof InputTypeToType;
 
@@ -382,7 +382,6 @@ export function NetworkTableValueView<V extends Exclude<NetworkTableMessageValue
 	const [value, setValue] = useNetworkTableValue<`${typeof key}`, V>(networkTableKey, key, childTable, ntTable);
 	const {ref} = useDraggable(props);
 
-	let children: React.ReactNode;
 	if(childType === "checkbox") {
 		return <BooleanNetworkTableInput ref={ref} label={networkTableKey} name={networkTableKey} type={childType} checked={value as boolean} onChange={setValue as any} />
 	} else {

@@ -168,6 +168,12 @@ export function useNetworkTable<Type extends NetworkTableMessageType, Value exte
 	return useContext(WebSocketCtx);
 }
 
+type MessageTypeToValue<T extends NetworkTableMessageType> = {
+	"string": string, "string[]": string[],
+	"boolean": boolean, "boolean[]": boolean[],
+	"double": number, "double[]": number[]
+}[T];
+
 /**
  * Provides a reacty way of accessing/updating NetworkTable entries. The default functionality assumes
  * that you're using the default SmartDashboard network table, or a "child" table within the SmartDashboard network table.
@@ -178,7 +184,7 @@ export function useNetworkTable<Type extends NetworkTableMessageType, Value exte
  * @param baseNetworkTable If you're NOT using smart dashboard's built-in NetworkTable override this with your Network Table name
  * @returns A tuple that contains 2 items, the first is the current value of the network table, the second is method that updates the network table value
  */
-export function useNetworkTableValue<Type extends NetworkTableMessageType, Value extends NetworkTableMessageValue>(
+export function useNetworkTableValue<Type extends NetworkTableMessageType, Value extends NetworkTableMessageValue = MessageTypeToValue<Type>>(
 	key: string,
 	type: Type,
 	childNetworkTable: string = "",

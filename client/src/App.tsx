@@ -5,6 +5,9 @@ import {ConnectionListener} from "./components/ConnectionListener";
 import {DndProvider} from "react-dnd";
 import {HTML5Backend} from "react-dnd-html5-backend";
 import {Modal} from "./layout/Modal";
+import { ColumnedCell, ColumnedGrid } from "./layout/ColumnedGrid";
+import {NetworkTableTimeSeries} from "./reports/NetworkTableGridChart";
+import { FlexCell } from "./layout/FlexGrid";
 
 type ChildType = {key: string} & (
 	{type: Exclude<NetworkTableMessageType, `${string}[]`>, childType: Exclude<NetworkTableInputTypes, "radio">} |
@@ -19,7 +22,13 @@ export function App() {
 			<WebSockerProvider>
 				<div id="wrapper" className={theme}>
 					<div className="body">
-						<h1>I am the body</h1>
+						<ColumnedGrid columns={4}>
+							<FlexCell full>
+								<NetworkTableTimeSeries
+									networkTableKey="double"
+								/>
+							</FlexCell>
+						</ColumnedGrid>
 					</div>
 					<div className="head">
 						<ConnectionListener />

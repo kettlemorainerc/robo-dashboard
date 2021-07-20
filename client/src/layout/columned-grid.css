@@ -1,0 +1,17 @@
+.columned-grid {
+    display: flex;
+    flex-flow: row wrap;
+    /* padding: calc(-1 * var(--cg-pad-vertical, 0px)) calc(-1 * var(--ch-pad-horizontal, 0px)); */
+    margin: calc(-1 * var(--cg-mar-vertical, 0px)) calc(-1 * var(--ch-mar-horizontal, 0px));
+}
+
+.columned-cell {
+    flex: 1 1 auto;
+    width: var(--ch-width, auto);
+}
+
+.columned-grid > .flex-cell,
+.columned-grid > .columned-cell {
+    padding: var(--cg-pad-vertical, 0px) var(--ch-pad-horizontal, 0px);
+    margin: var(--cg-mar-vertical, 0px) var(--ch-mar-horizontal, 0px);
+}
